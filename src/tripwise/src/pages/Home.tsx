@@ -1,5 +1,12 @@
+import NavButtons from "../components/NavButtons";
+
 function Home() {
-    return <h1>home page</h1>;
-  }
-  
-  export default Home;
+  return (
+    <div>
+      <NavButtons />
+      <h1>Welcome to Home</h1>
+    </div>
+  );
+}
+
+export default Home;
