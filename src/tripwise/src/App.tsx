@@ -5,6 +5,7 @@ import Recommend from "./pages/Recommend.tsx";
 import Travel from "./pages/Travel.tsx";
 import Review from "./pages/Review.tsx";
 import Alert from "./pages/Alert.tsx";
+import "./App.css";
 
 function App() {
   return (
