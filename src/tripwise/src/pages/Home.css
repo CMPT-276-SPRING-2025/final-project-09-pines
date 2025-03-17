@@ -1,11 +1,13 @@
+/* Container for the home page */
 .home-container {
-    position: relative;
-    min-height: 100vh;
-    background-color: #d9d9d9;
-    padding: 80px;
-    box-sizing: border-box;
-  }
+  position: relative;
+  min-height: 100vh;
+  background-color: #d9d9d9;
+  padding: 80px;
+  box-sizing: border-box;
+}
 
+/* Calendar icon positioned at the top left */
 .calendar-icon {
   position: absolute;
   top: 25px;
@@ -14,24 +16,28 @@
   font-size: 2.5rem;
 }
 
+/* Main content area layout */
 .main-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 200px;
+  margin-top: 200px; /* Adjust to move content lower */
 }
 
+/* Left side containing title and search bar */
 .left-area {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+/* Title styling */
 .left-area h1 {
   font-size: 2.5rem;
   margin: 0 20px;
 }
 
+/* Search bar styling */
 .search-bar {
   display: flex;
   background-color: white;
@@ -43,11 +49,12 @@
   cursor: pointer;
 }
 
+/* Emoji inside search bar */
 .search-emoji {
   font-size: 1.8rem;
 }
 
-
+/* Input field inside search bar */
 .search-bar input {
   border: none;
   font-size: 1.2rem;
@@ -56,11 +63,13 @@
   cursor: pointer;
 }
 
+/* Right side containing feature selection buttons */
 .right-area {
   margin-top: 15px;
   margin-right: 15px;
 }
 
+/* Feature buttons */
 .feature-button {
   border: none;
   border-radius: 9999px;
@@ -74,17 +83,20 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Button groups to align features */
 .button-group-top,
 .button-group-bottom {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 10px; /* Add spacing between buttons */
+  margin-bottom: 15px; /* Space between the two button rows */
 }
 
+/* Button hover effect */
 .feature-button:hover {
   background-color: #eaeaea;
 }
 
+/* Active feature button style */
 .feature-button.active {
   background-color: #000;
   color: #fff;
