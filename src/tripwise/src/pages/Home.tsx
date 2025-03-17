@@ -1,10 +1,24 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 type FeatureKey = "plan" | "on-the-go" | "recommend" | "travel" | "review" | "alert";
 
-const featureMap: Record<FeatureKey, { title: string; placeholder: string }> = {
+type FeatureData = {
+  title: string;
+  placeholder: string;
+};
+
+type FeatureMap = {
+  plan: FeatureData;
+  "on-the-go": FeatureData;
+  recommend: FeatureData;
+  travel: FeatureData;
+  review: FeatureData;
+  alert: FeatureData;
+};
+
+const featureMap: FeatureMap = {
   plan: {
     title: "So, you want to travel...",
     placeholder: "where do you want to go?",
@@ -33,7 +47,6 @@ const featureMap: Record<FeatureKey, { title: string; placeholder: string }> = {
 
 function Home() {
   const navigate = useNavigate();
-
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey>("plan");
 
   const handleFeatureClick = (feature: FeatureKey) => {
@@ -47,6 +60,9 @@ function Home() {
   const handleCalendarClick = () => {
     navigate("/schedule");
   };
+
+  const topFeatures: FeatureKey[] = ["plan", "on-the-go", "recommend"];
+  const bottomFeatures: FeatureKey[] = ["travel", "review", "alert"];
 
   return (
     <div className="home-container">
@@ -67,21 +83,34 @@ function Home() {
           </div>
         </div>
 
-        <div>
-          {(
-            [
-              "plan",
-              "on-the-go",
-              "recommend",
-              "travel",
-              "review",
-              "alert",
-            ] as FeatureKey[]
-          ).map((feature) => (
-            <button onClick={() => handleFeatureClick(feature)} >
-              {feature}
-            </button>
-          ))}
+        <div className="right-area">
+          <div className="button-group-top">
+            {topFeatures.map((feature) => (
+              <button
+                key={feature}
+                className={`feature-button ${
+                  selectedFeature === feature ? "active" : ""
+                }`}
+                onClick={() => handleFeatureClick(feature)}
+              >
+                {feature}
+              </button>
+            ))}
+          </div>
+
+          <div className="button-group-bottom">
+            {bottomFeatures.map((feature) => (
+              <button
+                key={feature}
+                className={`feature-button ${
+                  selectedFeature === feature ? "active" : ""
+                }`}
+                onClick={() => handleFeatureClick(feature)}
+              >
+                {feature}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -89,4 +118,3 @@ function Home() {
 }
 
 export default Home;
-  
