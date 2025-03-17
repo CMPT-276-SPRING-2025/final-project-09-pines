@@ -1,10 +1,22 @@
-import NavButtons from "../components/NavButtons";
+
+import "./Home.css";
 
 function Home() {
   return (
     <div>
-      <NavButtons />
-      <h1>Welcome to Home</h1>
+      <div>
+        📅
+      </div>
+
+      <div>
+        <div>
+          <h1>title</h1>
+        </div>
+
+        <div>
+          buttons
+        </div>
+      </div>
     </div>
   );
 }

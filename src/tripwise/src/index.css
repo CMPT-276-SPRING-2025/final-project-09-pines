@@ -1,8 +1,6 @@
 :root {
   background-color: #d9d9d9; 
   font-family: Arial;
-  display: flex;
-  justify-content: center;
   height: 100vh;
   margin: 0;
 }
