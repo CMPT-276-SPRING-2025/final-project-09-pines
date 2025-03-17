@@ -6,7 +6,7 @@ type FeatureKey = "plan" | "on-the-go" | "recommend" | "travel" | "review" | "al
 
 const featureMap: Record<FeatureKey, { title: string; placeholder: string }> = {
   plan: {
-    title: "So, you want to travel... ✈️",
+    title: "So, you want to travel...",
     placeholder: "where do you want to go?",
   },
   "on-the-go": {
@@ -49,17 +49,18 @@ function Home() {
   };
 
   return (
-    <div>
-      <div onClick={handleCalendarClick}>
+    <div className="home-container">
+      <div className="calendar-icon" onClick={handleCalendarClick}>
         📅
       </div>
 
-      <div>
-        <div>
+      <div className="main-content">
+        <div className="left-area">
           <h1>{featureMap[selectedFeature].title}</h1>
-          <div onClick={handleSearchClick}>
+          <div className="search-bar" onClick={handleSearchClick}>
             <span className="search-emoji">📍</span>
             <input
+              type="text"
               placeholder={featureMap[selectedFeature].placeholder}
               readOnly
             />
@@ -75,7 +76,8 @@ function Home() {
               "travel",
               "review",
               "alert",
-            ] as FeatureKey[] ).map((feature) => (
+            ] as FeatureKey[]
+          ).map((feature) => (
             <button onClick={() => handleFeatureClick(feature)} >
               {feature}
             </button>
