@@ -1,65 +1,104 @@
-.chat-container {
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  
+  .chat-container {
     display: flex;
     flex-direction: column;
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100vw;
+    height: 100vh;
     padding: 20px;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
-    border-radius: 10px;
-}
-
-.chat-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.chat-window {
+    box-sizing: border-box;
+  }
+  
+  /* Set the header as position relative so we can absolutely position the back button */
+  .chat-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  /* Position the back button to the left */
+  .back-button {
+    position: absolute;
+    left: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #000;
+  }
+  
+  /* Centered container for feature buttons */
+  .chat-feature-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Feature buttons styling */
+  
+  .feature-button.active {
+    background-color: #000;
+    color: #fff;
+  }
+  
+  .chat-window {
     flex: 1;
     padding: 20px;
     background-color: #fff;
     border-radius: 10px;
     overflow-y: auto;
     margin-bottom: 20px;
-}
-
-.chat-message {
+  }
+  
+  .chat-message {
     margin-bottom: 20px;
     padding: 10px;
     border-radius: 10px;
     max-width: 70%;
-}
-
-.user-message {
+  }
+  
+  .user-message {
     background-color: #d1e7dd;
     text-align: right;
     margin-left: auto;
-}
-
-.gemini-message {
+  }
+  
+  .gemini-message {
     background-color: #f8d7da;
     text-align: left;
     margin-right: auto;
-}
-
-.chat-input-container {
+  }
+  
+  /* Input row for message input and send button */
+  .chat-input-row {
     display: flex;
     align-items: center;
-    padding: 10px;
-    background-color: #fff;
-    border-radius: 10px;
-}
-
-.chat-input {
+    gap: 10px;
+  }
+  
+  .chat-input-box {
     flex: 1;
+    background-color: #fff;
     padding: 10px;
-    border: none;
     border-radius: 10px;
-    margin-right: 10px;
+    box-sizing: border-box;
+  }
+  
+  .chat-input {
+    width: 100%;
+    border: none;
+    outline: none;
     font-size: 16px;
-}
-
-.chat-send-button {
+  }
+  
+  .chat-send-button {
     padding: 10px 20px;
     border: none;
     border-radius: 10px;
@@ -67,4 +106,4 @@
     color: #fff;
     font-size: 20px;
     cursor: pointer;
-}
+  }

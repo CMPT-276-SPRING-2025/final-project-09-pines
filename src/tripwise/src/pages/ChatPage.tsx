@@ -1,9 +1,10 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import './ChatPage.css'
 import React, { useEffect, useState } from "react";
 import { fetchChatResponse } from "../services/gemini.ts";
 
 function ChatPage() {
+    const navigate = useNavigate();
     const { feature } = useParams<{ feature: string }>();
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') || '';
@@ -53,11 +54,38 @@ function ChatPage() {
         }
     };
 
+    const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
+
+    const handleFeatureClick = (feature: string) => {
+        setMessages([]);
+        navigate(`/${feature}`);
+    };
+
+    const goHome = () => {
+        navigate("/");
+    };
+
+    const saveChat = () => {
+        // Save the chat messages to the backend.
+    };
+
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <h2>Chat - {feature}</h2>
+                <button className="back-button" onClick={goHome}>←</button>
+                <div className="chat-feature-buttons">
+                    {features.map((btnfeature) => (
+                        <button
+                            key={btnfeature}
+                            className={`feature-button ${btnfeature === feature ? "active" : ""}`}
+                            onClick={() => handleFeatureClick(btnfeature)}
+                        >
+                            {btnfeature}
+                        </button>
+                    ))}
+                </div>
             </div>
+
             <div className="chat-window">
                 {messages.map((message, index) => (
                     <div key={index} className={`chat-message ${message.type}-message`}>
@@ -65,16 +93,18 @@ function ChatPage() {
                     </div>
                 ))}
             </div>
-            <div className="chat-input-container">
-                <input 
-                    type="text"
-                    className="chat-input"
-                    placeholder="Type a message..."
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                />
-                <button className="chat-send-button" onClick={sendMessage}>Send</button>
+            <div className="chat-input-row">
+                <div className="chat-input-box">
+                    <input 
+                        type="text"
+                        className="chat-input"
+                        placeholder="Type a message..."
+                        value={inputValue}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                    />
+                </div>
+                <button className="chat-send-button" onClick={saveChat}>+</button>
             </div>
         </div>
     );
