@@ -1,0 +1,49 @@
+name: TripWise CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - ci-cd-testing 
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run ESLint (Check for Code Errors)
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+
+      - name: Run Prettier (Check Formatting)
+        run: npx prettier --check .
+
+  build-and-test:
+    needs: lint-and-format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests (Backend & Frontend)
+        run: npm test  
+
+      - name: Build Frontend (Vite)
+        run: npm run build  
