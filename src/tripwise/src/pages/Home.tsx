@@ -50,6 +50,7 @@ const featureMap: FeatureMap = {
 function Home() {
   const navigate = useNavigate();
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey>("plan");
+  const [query, setQuery] = useState("");
 
   // Handle feature button click and update selected feature
   const handleFeatureClick = (feature: FeatureKey) => {
@@ -58,8 +59,14 @@ function Home() {
 
   // Navigate to the selected feature's page when clicking the search bar
   const handleSearchClick = () => {
-    navigate(`/${selectedFeature}`);
+    navigate(`/${selectedFeature}?q=${encodeURIComponent(query)}`);
   };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearchClick();
+    }
+  }
 
   // Navigate to the schedule page when clicking the calendar icon
   const handleCalendarClick = () => {
@@ -81,12 +88,15 @@ function Home() {
         {/* Left area containing the title and search bar */}
         <div className="left-area">
           <h1>{featureMap[selectedFeature].title}</h1>
-          <div className="search-bar" onClick={handleSearchClick}>
+          <div className="search-bar">
             <span className="search-emoji">📍</span>
             <input
+              className = "text-input"
               type="text"
               placeholder={featureMap[selectedFeature].placeholder}
-              readOnly
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleInputKeyDown}
             />
           </div>
         </div>
