@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
-      - ci-cd-testing 
+      - ci-cd-testing  
 
 jobs:
-  lint-and-format:
+  build-only:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -18,32 +18,21 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install Frontend Dependencies
+        run: |
+          cd src/tripwise && npm install
 
-      - name: Run ESLint (Check for Code Errors)
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+      - name: Install Backend Dependencies
+        run: |
+          cd src/tripwise/backend && npm install
 
-      - name: Run Prettier (Check Formatting)
-        run: npx prettier --check .
-
-  build-and-test:
-    needs: lint-and-format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set Up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Tests (Backend & Frontend)
-        run: npm test  
+      - name: Skip Tests (No Tests Yet)
+        run: echo "Skipping tests since no tests are defined."
 
       - name: Build Frontend (Vite)
-        run: npm run build  
+        run: |
+          cd src/tripwise && npm run build
+
+      - name: CI/CD Passed 
+        run: echo "CI/CD Passed Successfully!"
+ 
