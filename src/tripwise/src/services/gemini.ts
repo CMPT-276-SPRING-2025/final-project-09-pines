@@ -1,5 +1,28 @@
 export async function fetchChatResponse(feature: string, query: string): Promise<string> {
     try {
+        let prompt = "";
+        switch (feature) {
+            case "plan":
+                prompt = ""
+                break;
+            case "on-the-go":
+                prompt = "";
+                break;
+            case "recommend":
+                prompt = "";
+                break;
+            case "travel":
+                prompt = "You are designed to help users communicate seamlessly with the amadeus API to find the cheapest flights and hotels, take whatever input the user gives you and format it as an API call to the amadeus API. If a users chat does not make sense for this purpose then you should respond that you are not designed to handle that request, instead just respond in the most friendly way possible asking for the relevant information. Try to infer as much information as possible from the user's chat to make the API call as accurate as possible. If the user asks for a specific hotel or flight then you should respond with the relevant information from the API. If the user asks for a general recommendation then you should respond with a list of the top 5 cheapest flights or hotels. If the user asks for a specific type of hotel or flight then you should respond with the relevant information from the API. If the user asks for a specific type of hotel or flight then you should respond with the relevant information from the API. When the API call is made only print the API call and no other text";
+                break;
+            case "review":
+                prompt = "";
+                break;
+            case "alert":
+                prompt = "";
+                break;
+            default:
+                return "Invalid feature";
+        }
       console.log(`Sending request to ${feature} endpoint with query: "${query}"`);
       
       // Build the endpoint URL according to the feature
@@ -15,7 +38,7 @@ export async function fetchChatResponse(feature: string, query: string): Promise
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ prompt, query }),
       });
       
       console.log("Response status:", response.status);

@@ -10,32 +10,33 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 let chatSession = null;
 
 exports.clearChat = (req, res) => {
-  chatSession = null;
-  res.json({ message: "Chat history cleared" });
+  try {
+    chatSession = null;
+    res.json({ message: "Chat history cleared" });
+  } catch (error) {
+    console.error("Error clearing chat history:", error);
+    res.status(500).json({ message: "Error clearing chat history" });
+  }
 };
 
 exports.handleTravelChat = async (req, res) => {
-  const { query } = req.body;
+  const { prompt, query } = req.body;
   try {
-    // Initialize chat session if it doesn't exist
+    // Reinitialize chatSession if needed
     if (!chatSession) {
+      // Initialize with the instruction first.
       chatSession = model.startChat({
-        history: [],
-        generationConfig: {
-          maxOutputTokens: 200,
-        },
+        history: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 200 },
       });
     }
-
+    // Now send the user's query as a separate message.
     const result = await chatSession.sendMessage(query);
     const response = result.response;
-
-    if (response && response.text) {
-      const message = response.text();
-      res.json({ message: message });
+    if (response?.text) {
+      res.json({ message: response.text() });
     } else {
-      console.error("Unexpected Gemini API response:", response);
-      res.status(500).json({ message: "Failed to get a valid response from Gemini API" });
+      res.status(500).json({ message: "Failed to get a valid response" });
     }
   } catch (error) {
     console.error("Error in handleTravelChat:", error);

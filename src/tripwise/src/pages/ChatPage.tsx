@@ -2,6 +2,7 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import './ChatPage.css'
 import React, { useEffect, useState } from "react";
 import { fetchChatResponse, clearChat } from "../services/gemini.ts";
+import ReactMarkdown from "react-markdown";
 
 function ChatPage() {
     const navigate = useNavigate();
@@ -95,7 +96,7 @@ function ChatPage() {
             <div className="chat-window">
                 {messages.map((message, index) => (
                     <div key={index} className={`chat-message ${message.type}-message`}>
-                        {message.text}
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
                     </div>
                 ))}
             </div>
