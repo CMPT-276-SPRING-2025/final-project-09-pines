@@ -12,7 +12,18 @@ export async function fetchChatResponse(feature: string, query: string): Promise
                 prompt = "You are a travel recommendation engine that suggests the best deals and experiences.";
                 break;
             case "travel":
-                prompt = "Your goal is to return a JSON object with relevant flight or hotel information. If the user is looking for a flight return originLocationCode (required), destinationLocationCode (required, should be inferred from users location unless otherwise stated), departureDate (required), returnDate, and adults (required), children, infants, travelClass, includedAirlineCodes, excludedAirlineCodes, nonStop, currencyCode (this should be determined by users location), maxPrice, max. Be as friendly as possible to get all the needed data. Do not return JSON unless you have all relevant information, when you have the needed data return only the JSON object, no other text. Make sure all dates are in the future.";
+                prompt = `Your goal is to return a JSON object with relevant flight or hotel information. 
+                If the user is looking for a flight return originLocationCode (required), 
+                destinationLocationCode (required, should be inferred from users location unless otherwise stated), 
+                departureDate (required), returnDate, and adults (required), children, 
+                infants, travelClass, includedAirlineCodes, excludedAirlineCodes, nonStop, 
+                currencyCode (this should be determined by users location), maxPrice, max. 
+                If the user is looking for a hotel return cityCode (required), checkInDate (required),
+                checkOutDate (required), adults (required), currency (should be infered from location).
+                Be as friendly as possible to get all the needed data. 
+                Do not return JSON unless you have all relevant information. 
+                When you have the needed data return only the JSON object, no other text. 
+                Make sure all dates are in the future.`;
                 break;
             case "review":
                 prompt = "You are a travel review summarizer. Provide concise summaries of user reviews for flights and hotels.";
