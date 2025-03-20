@@ -3,22 +3,22 @@ export async function fetchChatResponse(feature: string, query: string): Promise
         let prompt = "";
         switch (feature) {
             case "plan":
-                prompt = ""
+                prompt = "You are a travel planner that helps design detailed itineraries based on user input.";
                 break;
             case "on-the-go":
-                prompt = "";
+                prompt = "You are an on-the-go travel assistant providing quick, concise advice.";
                 break;
             case "recommend":
-                prompt = "";
+                prompt = "You are a travel recommendation engine that suggests the best deals and experiences.";
                 break;
             case "travel":
-                prompt = "You are designed to help users communicate seamlessly with the amadeus API to find the cheapest flights and hotels, take whatever input the user gives you and format it as an API call to the amadeus API. If a users chat does not make sense for this purpose then you should respond that you are not designed to handle that request, instead just respond in the most friendly way possible asking for the relevant information. Try to infer as much information as possible from the user's chat to make the API call as accurate as possible. If the user asks for a specific hotel or flight then you should respond with the relevant information from the API. If the user asks for a general recommendation then you should respond with a list of the top 5 cheapest flights or hotels. If the user asks for a specific type of hotel or flight then you should respond with the relevant information from the API. If the user asks for a specific type of hotel or flight then you should respond with the relevant information from the API. When the API call is made only print the API call and no other text";
+                prompt = "Your goal is to return a JSON object with relevant flight or hotel information. If the user is looking for a flight return originLocationCode (required), destinationLocationCode (required, should be inferred from users location unless otherwise stated), departureDate (required), returnDate, and adults (required), children, infants, travelClass, includedAirlineCodes, excludedAirlineCodes, nonStop, currencyCode (this should be determined by users location), maxPrice, max. Be as friendly as possible to get all the needed data. Do not return JSON unless you have all relevant information, when you have the needed data return only the JSON object, no other text. Make sure all dates are in the future.";
                 break;
             case "review":
-                prompt = "";
+                prompt = "You are a travel review summarizer. Provide concise summaries of user reviews for flights and hotels.";
                 break;
             case "alert":
-                prompt = "";
+                prompt = "You are a travel alert system. Notify users of important travel information and alerts.";
                 break;
             default:
                 return "Invalid feature";
@@ -26,9 +26,8 @@ export async function fetchChatResponse(feature: string, query: string): Promise
       console.log(`Sending request to ${feature} endpoint with query: "${query}"`);
       
       // Build the endpoint URL according to the feature
-      const endpoint = feature === "travel" 
-        ? "http://localhost:5001/api/travel/chat" 
-        : `http://localhost:5001/api/${feature}/chat`;
+      const endpoint = "http://localhost:5001/api/chat";
+
         
       console.log("Calling endpoint:", endpoint);
       
@@ -38,7 +37,7 @@ export async function fetchChatResponse(feature: string, query: string): Promise
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ prompt, query }),
+        body: JSON.stringify({ feature, prompt, query }),
       });
       
       console.log("Response status:", response.status);
@@ -74,7 +73,7 @@ export async function fetchChatResponse(feature: string, query: string): Promise
 
 export async function clearChat(): Promise<void> {
   try {
-    const endpoint = "http://localhost:5001/api/travel/clearChat";
+    const endpoint = "http://localhost:5001/api/clearChat";
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
