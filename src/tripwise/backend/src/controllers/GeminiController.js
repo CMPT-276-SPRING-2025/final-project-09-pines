@@ -27,8 +27,7 @@ exports.handleChat = async (req, res) => {
       const today = new Date().toISOString().split("T")[0];
       const updatedPrompt = `${prompt}\nToday's date is ${today}.`;
       chatSession = model.startChat({
-        history: [{ role: "user", parts: [{ text: updatedPrompt }] }],
-        generationConfig: { maxOutputTokens: 200 },
+        history: [{ role: "user", parts: [{ text: updatedPrompt }] }]
       });
     }
 
