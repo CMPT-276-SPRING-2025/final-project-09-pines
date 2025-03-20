@@ -46,7 +46,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   gap: 5px;
   width: 700px;
-  cursor: pointer;
+  
 }
 
 /* Emoji inside search bar */
@@ -58,9 +58,8 @@
 .search-bar input {
   border: none;
   font-size: 1.2rem;
-  width: 550px;
+  width: 700px;
   color: #333;
-  cursor: pointer;
 }
 
 /* Right side containing feature selection buttons */
