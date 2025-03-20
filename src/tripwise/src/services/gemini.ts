@@ -48,3 +48,26 @@ export async function fetchChatResponse(feature: string, query: string): Promise
       }
     }
   }
+
+export async function clearChat(): Promise<void> {
+  try {
+    const endpoint = "http://localhost:5001/api/travel/clearChat";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server error response:", errorText);
+      throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+    }
+
+    console.log("Chat history cleared successfully");
+  } catch (error) {
+    console.error("Error clearing chat history:", error);
+    throw error;
+  }
+}

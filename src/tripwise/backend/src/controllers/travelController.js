@@ -1,25 +1,41 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Replace with your actual API key or use process.env for security.
-const apiKey= process.env.API_KEY;
+// Use your API key from environment variables
+const apiKey = process.env.API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+// In-memory chat session (for a real app, store per user/session)
+let chatSession = null;
+
+exports.clearChat = (req, res) => {
+  chatSession = null;
+  res.json({ message: "Chat history cleared" });
+};
 
 exports.handleTravelChat = async (req, res) => {
   const { query } = req.body;
   try {
-    const result = await model.generateContent(query);
-    // Log the full raw result for debugging
-    console.log("Gemini API result:", result);
-    // Check if the response exists and has the expected method/text property.
-    if (result && result.response && typeof result.response.text === "function") {
-      const message = result.response.text();
-      console.log("Extracted message:", message);
-      res.json({ message });
+    // Initialize chat session if it doesn't exist
+    if (!chatSession) {
+      chatSession = model.startChat({
+        history: [],
+        generationConfig: {
+          maxOutputTokens: 200,
+        },
+      });
+    }
+
+    const result = await chatSession.sendMessage(query);
+    const response = result.response;
+
+    if (response && response.text) {
+      const message = response.text();
+      res.json({ message: message });
     } else {
-      console.error("Unexpected Gemini API response structure:", result);
-      res.status(500).json({ message: "Unexpected response format from Gemini API" });
+      console.error("Unexpected Gemini API response:", response);
+      res.status(500).json({ message: "Failed to get a valid response from Gemini API" });
     }
   } catch (error) {
     console.error("Error in handleTravelChat:", error);

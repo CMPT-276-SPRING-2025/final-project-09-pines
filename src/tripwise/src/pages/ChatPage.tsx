@@ -1,7 +1,7 @@
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import './ChatPage.css'
 import React, { useEffect, useState } from "react";
-import { fetchChatResponse } from "../services/gemini.ts";
+import { fetchChatResponse, clearChat } from "../services/gemini.ts";
 
 function ChatPage() {
     const navigate = useNavigate();
@@ -56,8 +56,14 @@ function ChatPage() {
 
     const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
 
-    const handleFeatureClick = (feature: string) => {
+    const handleFeatureClick = async (feature: string) => {
         setMessages([]);
+        try {
+            await clearChat();
+            console.log("Chat cleared");
+        } catch (error) {
+            console.error("Error clearing chat:", error);
+        }
         navigate(`/${feature}`);
     };
 
