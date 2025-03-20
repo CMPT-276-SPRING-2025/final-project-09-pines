@@ -11,11 +11,34 @@ function ChatPage() {
     const query = searchParams.get('q') || '';
     const [inputValue, setInputValue] = useState("");
     const [messages, setMessages] = useState<{ type: string, text: string }[]>([]);
+    const [location, setLocation] = useState<string>("");
+
+    // Request user's current location on mount.
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
+                    setLocation(coords);
+                    console.log("User location:", coords);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    setLocation("Unknown");
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+            setLocation("Not supported");
+        }
+    }, []);
 
     // On mount, if there's a query from Home, use it as the first user message.
     useEffect(() => {
         if (feature && query) {
-            fetchChatResponse(feature, query)
+            // Append the user's location into the query.
+            const promptWithLocation = `User location: ${location || "unknown"}\n${query}`;
+            fetchChatResponse(feature, promptWithLocation)
                 .then((response) => {
                     // Set initial messages: the home page's query and the Gemini response.
                     setMessages([{ type: "user", text: query }, { type: "gemini", text: response }]);
@@ -25,7 +48,7 @@ function ChatPage() {
                     setMessages([{ type: "user", text: query }, { type: "gemini", text: "Error fetching response" }]);
                 });
         }
-    }, [feature, query]);
+    }, [feature, query, location]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
@@ -40,10 +63,10 @@ function ChatPage() {
     const sendMessage = () => {
         if (inputValue.trim() && feature) {
             const userMessage = inputValue.trim();
-            // Append the new user message after what is already there.
+            // Append location information to the query prompt.
+            const promptWithLocation = `User location: ${location || "unknown"}\n${userMessage}`;
             setMessages(prev => [...prev, { type: "user", text: userMessage }]);
-            // Call the backend and then append the Gemini response.
-            fetchChatResponse(feature, userMessage)
+            fetchChatResponse(feature, promptWithLocation)
                 .then(response => {
                     setMessages(prev => [...prev, { type: "gemini", text: response }]);
                 })
