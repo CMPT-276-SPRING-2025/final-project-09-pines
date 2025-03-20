@@ -1,5 +1,5 @@
 const express = require('express');
-const { handleTravelChat, clearChat } = require('../controllers/travelController');
+const { handleTravelChat, clearChat } = require('../controllers/GeminiController');
 const router = express.Router();
 
 router.post('/chat', handleTravelChat);
