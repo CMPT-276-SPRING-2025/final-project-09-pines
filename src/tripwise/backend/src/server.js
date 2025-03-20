@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const travelRoutes = require('./routes/travelRoutes');
+const travelRoutes = require('./routes/GeminiRoutes');
 require('dotenv').config();
 
 const app = express();
