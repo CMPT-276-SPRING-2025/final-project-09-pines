@@ -49,8 +49,8 @@
   padding: 0.4rem 1rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   gap: 0.5rem;
-  width: 100%; /* 부모 요소 기준 */
-  max-width: 700px; /* 최대 크기 제한 */
+  width: 100%;
+  max-width: 700px;
 }
 
 /* Search Emoji */
@@ -114,4 +114,77 @@
   outline: none;
   box-shadow: none;
   border: none;
+}
+
+/* Responsive adjustments for MacBook screens */
+@media (min-width: 2000px) {
+  
+  .calendar-icon {
+    position: absolute;
+    top: 3rem;
+    left: 3rem;
+    cursor: pointer;
+    font-size: 3.5rem;
+  }
+
+  .left-area h1 {
+    font-size: 4rem;
+    margin: 0 2rem;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 6rem;
+    padding: 1rem 2rem;
+    box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.2);
+    gap: 1rem;
+    width: 100%;
+    max-width: 60vw;
+  }
+  
+  .search-bar input {
+    border: none;
+    font-size: 2rem;
+    flex-grow: 1;
+    color: #333;
+    min-width: 0;
+  }
+
+  .search-emoji {
+    font-size: 2.5rem;
+  }
+
+  .right-area {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex: 1;
+    min-width: 20rem;
+    margin-right: 1vw;
+    margin-top: 1vw;
+  }
+  
+  .feature-button {
+    border: none;
+    border-radius: 4rem;
+    background-color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    width: 16rem;
+    height: 5.5rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+  }
+  
+  .button-group-top,
+  .button-group-bottom {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
 }
