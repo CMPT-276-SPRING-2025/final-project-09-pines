@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/:feature" element={<ChatPage />} />
-        <Route path="/:schedule" element={<Schedule />} />
+        <Route path="/schedule" element={<Schedule />} />
       </Routes>
     </Router>
   );
