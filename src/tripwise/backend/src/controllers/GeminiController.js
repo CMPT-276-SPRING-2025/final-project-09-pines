@@ -57,62 +57,60 @@ exports.handleChat = async (req, res) => {
         console.log("Could not parse extracted text as JSON.");
       }
 
-      // Check if this is a flight search.
-      if (
-        searchParamsObj &&
-        searchParamsObj.originLocationCode &&
-        searchParamsObj.destinationLocationCode &&
-        searchParamsObj.departureDate &&
-        searchParamsObj.adults
-      ) {
-        console.log("Detected flight search. Calling Amadeus.getFlightOffers with:", searchParamsObj);
-        const flightOffers = await Amadeus.getFlightOffers(searchParamsObj);
-        const friendlyPrompt = "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(flightOffers);
-        console.log("Sending friendly prompt to Gemini (flight):", friendlyPrompt);
-        const friendlyResult = await chatSession.sendMessage(friendlyPrompt);
-        const friendlyText = friendlyResult.response && typeof friendlyResult.response.text === "function"
-          ? friendlyResult.response.text()
-          : "Could not retrieve a friendly summary.";
-        return res.json({ message: friendlyText });
-      
-      // Check if this is a hotel search.
-      } else if (
-        searchParamsObj &&
-        searchParamsObj.cityCode &&
-        searchParamsObj.checkInDate &&
-        searchParamsObj.checkOutDate &&
-        searchParamsObj.adults
-      ) {
-        console.log("Detected hotel search with parameters:", searchParamsObj);
-        // First, call getHotelsByCity with the city code.
-        const hotelsData = await Amadeus.getHotelsByCity({ cityCode: searchParamsObj.cityCode });
-        // Instead of using all hotel IDs, limit to the first 10 (or a suitable subset)
-        const hotelIDs = hotelsData.data ? hotelsData.data.map(hotel => hotel.hotelId).slice(0, 10) : [];
-        console.log("Extracted and limited hotelIDs:", hotelIDs);
-        if (hotelIDs.length === 0) {
-          throw new Error("No hotels found for the given city.");
+      // Only perform Amadeus API calls when the feature is "travel"
+      if (feature === "travel") {
+        // Check if this is a flight search.
+        if (
+          searchParamsObj &&
+          searchParamsObj.originLocationCode &&
+          searchParamsObj.destinationLocationCode &&
+          searchParamsObj.departureDate &&
+          searchParamsObj.adults
+        ) {
+          console.log("Detected flight search. Calling Amadeus.getFlightOffers with:", searchParamsObj);
+          const flightOffers = await Amadeus.getFlightOffers(searchParamsObj);
+          const friendlyPrompt = "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(flightOffers);
+          console.log("Sending friendly prompt to Gemini (flight):", friendlyPrompt);
+          const friendlyResult = await chatSession.sendMessage(friendlyPrompt);
+          const friendlyText = friendlyResult.response && typeof friendlyResult.response.text === "function"
+            ? friendlyResult.response.text()
+            : "Could not retrieve a friendly summary.";
+          return res.json({ message: friendlyText });
+          
+        // Check if this is a hotel search.
+        } else if (
+          searchParamsObj &&
+          searchParamsObj.cityCode &&
+          searchParamsObj.checkInDate &&
+          searchParamsObj.checkOutDate &&
+          searchParamsObj.adults
+        ) {
+          console.log("Detected hotel search with parameters:", searchParamsObj);
+          const hotelsData = await Amadeus.getHotelsByCity({ cityCode: searchParamsObj.cityCode });
+          const hotelIDs = hotelsData.data ? hotelsData.data.map(hotel => hotel.hotelId).slice(0, 10) : [];
+          console.log("Extracted and limited hotelIDs:", hotelIDs);
+          if (hotelIDs.length === 0) {
+            throw new Error("No hotels found for the given city.");
+          }
+          const hotelOfferParams = {
+            checkInDate: searchParamsObj.checkInDate,  
+            checkOutDate: searchParamsObj.checkOutDate,
+            adults: searchParamsObj.adults,
+            currency: searchParamsObj.currency
+          };
+          const hotelOffers = await Amadeus.getHotelOffers(hotelIDs, hotelOfferParams);
+          const friendlyPrompt = "Please convert the following hotel offer data into a friendly, human-readable summary:\n" + JSON.stringify(hotelOffers);
+          console.log("Sending friendly prompt to Gemini (hotel):", friendlyPrompt);
+          const friendlyResult = await chatSession.sendMessage(friendlyPrompt);
+          const friendlyText = friendlyResult.response && typeof friendlyResult.response.text === "function"
+            ? friendlyResult.response.text()
+            : "Could not retrieve a friendly summary.";
+          return res.json({ message: friendlyText });
         }
-        // Normalize date parameters (assuming Gemini returns checkInDate and checkOutDate)
-        const hotelOfferParams = {
-          // Use the same case the API expects; adjust if necessary.
-          checkInDate: searchParamsObj.checkInDate,  
-          checkOutDate: searchParamsObj.checkOutDate,
-          adults: searchParamsObj.adults,
-          currency: searchParamsObj.currency
-        };
-        const hotelOffers = await Amadeus.getHotelOffers(hotelIDs, hotelOfferParams);
-        const friendlyPrompt = "Please convert the following hotel offer data into a friendly, human-readable summary:\n" + JSON.stringify(hotelOffers);
-        console.log("Sending friendly prompt to Gemini (hotel):", friendlyPrompt);
-        const friendlyResult = await chatSession.sendMessage(friendlyPrompt);
-        const friendlyText = friendlyResult.response && typeof friendlyResult.response.text === "function"
-          ? friendlyResult.response.text()
-          : "Could not retrieve a friendly summary.";
-        return res.json({ message: friendlyText });
-      
-      } else {
-        console.log("Falling back to Gemini text response.");
-        return res.json({ message: text });
       }
+      
+      console.log("Falling back to Gemini text response.");
+      return res.json({ message: text });
 
     } else {
       console.error("Unexpected Gemini API response:", response);
