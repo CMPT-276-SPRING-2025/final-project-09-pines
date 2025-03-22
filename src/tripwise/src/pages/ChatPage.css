@@ -1,109 +1,122 @@
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  
-  .chat-container {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    box-sizing: border-box;
-  }
-  
-  /* Set the header as position relative so we can absolutely position the back button */
-  .chat-header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-  
-  /* Position the back button to the left */
-  .back-button {
-    position: absolute;
-    left: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #000;
-  }
-  
-  /* Centered container for feature buttons */
-  .chat-feature-buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  /* Feature buttons styling */
-  
-  .feature-button.active {
-    background-color: #000;
-    color: #fff;
-  }
-  
-  .chat-window {
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-  }
-  
-  .chat-message {
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 70%;
-  }
-  
-  .user-message {
-    background-color: #d1e7dd;
-    text-align: right;
-    margin-left: auto;
-  }
-  
-  .gemini-message {
-    background-color: #f8d7da;
-    text-align: left;
-    margin-right: auto;
-  }
-  
-  /* Input row for message input and send button */
-  .chat-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .chat-input-box {
-    flex: 1;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    box-sizing: border-box;
-  }
-  
-  .chat-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-size: 16px;
-  }
-  
-  .chat-send-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    background-color: #007bff;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-  }
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Set the header as position relative so we can absolutely position the back button */
+.chat-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* Feature Buttons */
+.feature-button {
+  border: none;
+  border-radius: 999px;
+  background-color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 9rem;
+  height: 2.7rem;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Position the back button to the left */
+.back-button {
+  position: absolute;
+  left: 20px;
+  background: none;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* Centered container for feature buttons */
+.chat-feature-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Feature buttons styling */
+.feature-button.active {
+  background-color: #000;
+  color: #fff;
+}
+
+.chat-window {
+  flex: 1;
+  padding: 0.5rem 0rem;
+  overflow-y: auto;
+  margin: 0rem 7rem;
+  margin-top: 0.5rem;
+}
+
+.chat-message {
+  margin-bottom: 0.5rem;
+  padding: 0.1rem 1.5rem;
+  width: fit-content;
+  max-width: 70%;
+}
+
+.user-message {
+  background-color: #c3c9e3;
+  text-align: right;
+  margin-left: auto;
+  border-radius: 999px;
+}
+
+.gemini-message {
+  text-align: left;
+  margin-right: auto;
+}
+
+/* Input row for message input and send button */
+.chat-input-row {
+  display: flex;
+  align-items: center;
+}
+
+.chat-input-box {
+  flex: 1;
+  background-color: #fff;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  margin-left: 9rem;
+  margin-right: 1rem;
+  border-radius: 999px;
+  box-sizing: border-box;
+}
+
+.chat-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 18px;
+}
+
+.chat-send-button {
+  padding-top: 1rem;
+  margin-right: 8rem;
+  border: none;
+  color: #000000;
+  font-size: 60px;
+  cursor: pointer;
+  background: none;
+}
