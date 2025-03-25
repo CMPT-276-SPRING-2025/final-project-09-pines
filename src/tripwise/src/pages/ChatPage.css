@@ -55,7 +55,7 @@ html, body {
 }
 
 /* Feature buttons styling */
-.feature-button.active {
+.nav-button.active {
   background-color: #000;
   color: #fff;
 }
