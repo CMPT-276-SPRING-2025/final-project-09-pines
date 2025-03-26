@@ -89,7 +89,7 @@ function Home() {
         <div className="left-area">
           <h1>{featureMap[selectedFeature].title}</h1>
           <div className="search-bar">
-            <span className="search-emoji">📍</span>
+            <span className="search-emoji">✈️</span>
             <input
               className = "text-input"
               type="text"

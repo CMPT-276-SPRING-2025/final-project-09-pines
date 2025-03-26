@@ -107,7 +107,7 @@ function ChatPage() {
                     {features.map((btnfeature) => (
                         <button
                             key={btnfeature}
-                            className={`feature-button ${btnfeature === feature ? "active" : ""}`}
+                            className={`nav-button ${btnfeature === feature ? "active" : ""}`}
                             onClick={() => handleFeatureClick(btnfeature)}
                         >
                             {btnfeature}
