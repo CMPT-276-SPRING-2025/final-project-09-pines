@@ -64,14 +64,16 @@ html, body {
   flex: 1;
   padding: 0.5rem 0rem;
   overflow-y: auto;
-  margin: 0rem 7rem;
+  margin: 0rem 6rem;
   margin-top: 0.5rem;
+  padding-right: 1rem;
 }
 
 .chat-message {
   margin-bottom: 0.5rem;
   padding: 0.1rem 1rem;
   width: fit-content;
+  word-break: break-word;
   max-width: 70%;
 }
 
@@ -79,7 +81,7 @@ html, body {
   background-color: #c3c9e3;
   text-align: right;
   margin-left: auto;
-  border-radius: 999px;
+  border-radius: 30px;
 }
 
 .gemini-message {
@@ -136,8 +138,9 @@ html, body {
   }
   
   .chat-window {
-    margin: 0rem 15rem;
+    margin: 0rem 12rem;
     margin-top: 1rem;
+    padding-right: 3rem;
   }
 
   .chat-message {
