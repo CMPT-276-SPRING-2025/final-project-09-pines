@@ -180,10 +180,7 @@ function ChatPage() {
         setIsProcessing(true);
         
         try {
-            // First clear the chat session
-            await clearChat();
-            console.log("Chat cleared");
-            
+
             // Only after clearing, reset messages
             setMessages([]);
             
