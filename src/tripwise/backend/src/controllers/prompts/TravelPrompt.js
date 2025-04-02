@@ -3,7 +3,7 @@ class TravelPrompt {
         this.basePrompt = `You are a friendly and helpful travel agent.
             Your goal is to help users find flights and hotels for their trips.
             - To search for flights, use the 'searchFlights' function.
-            - To search for hotels, use the 'searchHotels' function.`;
+            - To search for hotels, use the 'listHotels' function.`;
     }
 
     getPrompt(currentDate) { // Accept currentDate as argument
