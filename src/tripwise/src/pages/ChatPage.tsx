@@ -17,6 +17,7 @@ function ChatPage() {
     const [processingHotel, setProcessingHotel] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
+    const hasFetchedInitialRequest = useRef(false);
 
     // Function to extract hotel names from previous messages
     const extractHotelsFromMessages = (messages: { type: string, text: string }[]): string[] => {
@@ -68,9 +69,9 @@ function ChatPage() {
 
     // On mount, if there's a query from Home, use it as the first user message.
     useEffect(() => {
-        if (feature && query) {
+        if (feature && query && !hasFetchedInitialRequest.current) {
+            hasFetchedInitialRequest.current = true;
             setIsProcessing(true);
-            // Append the user's location into the query.
             const promptWithLocation = `User location: ${location || "unknown"}\n${query}`;
             fetchChatResponse(feature, promptWithLocation)
                 .then((response) => {
