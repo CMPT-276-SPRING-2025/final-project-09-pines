@@ -11,7 +11,7 @@ const { functionDefinitions } = require('./functionDefinitions');
 
 // Mapping between features and function definitions
 const featureFunctionMap = {
-    travel: [functionDefinitions.searchFlights, functionDefinitions.listHotels],
+    travel: [functionDefinitions.searchFlights, functionDefinitions.listHotels, functionDefinitions.hotelPrices],
     // Add other features and their function definitions here
 };
 
@@ -22,6 +22,13 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 let chatSession = null;
 let conversationHistory = []; // Add this at the top with your other variables
+
+const titleCase = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(function (word) {
+      return (word.charAt(0).toUpperCase() + word.slice(1));
+    }).join(' ');
+  };
 
 async function searchFlights(searchParams) {
     try {
@@ -35,58 +42,110 @@ async function searchFlights(searchParams) {
 }
 
 async function listHotels(searchParams) {
-  try {
-    const hotelsList = await Amadeus.getHotelsByCity(searchParams);
-  return hotelsList;
-  } catch (error) {
-    throw error;
-  }
+    try {
+      const hotelsList = await Amadeus.getHotelsByCity(searchParams);
+      // Store the results for future reference
+    lastHotelSearchResults = {
+        data: hotelsList.data.map(hotel => ({
+          name: hotel.name,
+          hotelId: hotel.hotelId
+        }))
+    };
+      return hotelsList;
+    } catch (error) {
+      throw error;
+    }
 }
 
-// Function to extract hotel references from chat history
-const extractHotelReferences = (chatSession) => {
-    if (!chatSession) return [];
-
-    // Look for hotel information in previous responses
-    const hotelMentions = [];
-
+async function hotelPrices(searchParams) {
     try {
-        // Get chat history if available
-        if (chatSession.getHistory && typeof chatSession.getHistory === 'function') {
-            const history = chatSession.getHistory();
+        console.log("Detected hotel prices request. Calling Amadeus.getHotelOffers with:", searchParams);
 
-            for (const msg of history) {
-                if (msg.role === 'model' && msg.parts && msg.parts[0] && msg.parts[0].text) {
-                    // Look for hotel names in AI responses
-                    const hotelMatches = msg.parts[0].text.match(/(?:hotel|Hotel|HOTEL)\s[A-Za-z\s\d]+/gi);
-                    if (hotelMatches) {
-                        hotelMatches.forEach(match => {
-                            const hotelName = match.replace(/(?:hotel|Hotel|HOTEL)\s/i, '').trim();
-                            if (hotelName && !hotelMentions.includes(hotelName)) {
-                                hotelMentions.push(hotelName);
-                            }
-                        });
-                    }
+        let hotelIds = [];
 
-                    // Look for hotel IDs
-                    const hotelIdMatches = msg.parts[0].text.match(/(?:hotel ID|hotelId|HOTEL ID)[:\s]+([A-Z0-9]+)/gi);
-                    if (hotelIdMatches) {
-                        hotelIdMatches.forEach(match => {
-                            const idPart = match.replace(/(?:hotel ID|hotelId|HOTEL ID)[:\s]+/i, '').trim();
-                            if (idPart && !hotelMentions.includes(`ID:${idPart}`)) {
-                                hotelMentions.push(`ID:${idPart}`);
-                            }
-                        });
-                    }
+        // Check if hotelNames are provided
+        if (searchParams.hotelNames && searchParams.hotelNames.length > 0) {
+            // Map hotel names to hotel IDs using lastHotelSearchResults
+            if (!lastHotelSearchResults || !lastHotelSearchResults.data) {
+                throw new Error("No previous hotel search results available. Please search for hotels first.");
+            }
+
+            hotelIds = searchParams.hotelNames.map(name => {
+                const hotel = lastHotelSearchResults.data.find(h => h.name === name);
+                if (hotel) {
+                    return hotel.hotelId;
+                } else {
+                    console.warn(`Hotel with name "${name}" not found in previous search results.`);
+                    return null; // Or handle not found hotels as needed
                 }
+            }).filter(id => id !== null); // Filter out hotels not found
+
+            if (hotelIds.length === 0) {
+                throw new Error("No matching hotel IDs found for the provided hotel names.");
+            }
+        } else {
+            // If no hotelNames are provided, use the previous hotel IDs
+            if (lastHotelSearchResults && lastHotelSearchResults.data) {
+                hotelIds = lastHotelSearchResults.data.map(hotel => hotel.hotelId);
+                console.log("Using hotel IDs from previous search:", hotelIds);
+            } else {
+                throw new Error("No hotel IDs provided and no previous hotel search results available. Please search for hotels first.");
             }
         }
-    } catch (error) {
-        console.error("Error extracting hotel references:", error);
-    }
 
-    return hotelMentions;
-};
+        // Validate hotel IDs
+        if (hotelIds.length === 0) {
+            throw new Error("No valid hotel IDs available.");
+        }
+
+        // Split hotelIds into chunks of 6
+        const hotelIdChunks = [];
+        for (let i = 0; i < hotelIds.length; i += 6) {
+            hotelIdChunks.push(hotelIds.slice(i, i + 6));
+        }
+
+        // Fetch hotel offers for each chunk
+        const hotelOffersResponses = [];
+        for (const chunk of hotelIdChunks) {
+            // Ensure currency is CAD if not provided
+            const chunkSearchParams = { ...searchParams, hotelIds: chunk };
+            delete chunkSearchParams.hotelNames; // Remove hotelNames, as it's not needed anymore
+            if (!chunkSearchParams.currency) {
+                chunkSearchParams.currency = 'CAD';
+            }
+            console.log("Requesting hotel offers for chunk:", chunk);
+            try {
+                const hotelOffers = await Amadeus.getHotelOffers(chunkSearchParams);
+                hotelOffersResponses.push(hotelOffers);
+            } catch (error) {
+                console.error("Error fetching hotel offers for chunk:", chunk, error);
+                // Handle the error as needed, e.g., skip this chunk or throw an error
+            }
+        }
+
+        // Combine the responses
+        const combinedHotelOffers = { data: [], warnings: [] };
+        for (const response of hotelOffersResponses) {
+            if (response.data) {
+                combinedHotelOffers.data = combinedHotelOffers.data.concat(response.data);
+            }
+            if (response.warnings) {
+                combinedHotelOffers.warnings = combinedHotelOffers.warnings.concat(response.warnings);
+            }
+        }
+
+        // Handle warnings
+        if (combinedHotelOffers.warnings.length > 0) {
+            console.warn("Amadeus API returned warnings:", combinedHotelOffers.warnings);
+        }
+
+        return combinedHotelOffers;
+
+    } catch (error) {
+        console.error("Error fetching hotel offers:", error);
+        throw error;
+    }
+}
 
 exports.clearChat = (req, res) => {
     try {
@@ -156,8 +215,10 @@ exports.handleChat = async (req, res) => {
             try {
                 if (functionName === "searchFlights") {
                     functionResponse = await searchFlights(functionArgs);
-                } else if (functionName === "searchHotels") {
-                    functionResponse = await searchHotels(functionArgs);
+                } else if (functionName === "listHotels") {
+                    functionResponse = await listHotels(functionArgs);
+                } else if (functionName === "hotelPrices") {
+                    functionResponse = await hotelPrices(functionArgs);
                 } else {
                     return res.status(400).json({ message: `Unknown function: ${functionName}` });
                 }
@@ -167,7 +228,7 @@ exports.handleChat = async (req, res) => {
                 // Create function response prompt
                 const functionDataPrompt = functionName === "searchFlights"
                     ? "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse)
-                    : "Please convert the following hotel offer data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse);
+                    : "Please convert the following hotel offer data into a friendly, human-readable summary, using proper noun casing for the hotel names. It should not just be a list of hotels but have nicer formatting. Choose the best 5:\n" + JSON.stringify(functionResponse);
 
                 // Add the function response request to conversation history
                 conversationHistory.push({ role: "user", parts: [{ text: functionDataPrompt }] });

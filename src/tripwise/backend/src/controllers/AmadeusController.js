@@ -98,23 +98,28 @@ async function getHotelsByCity(queryParams) {
     }
 }
 
-async function getHotelOffers(hotelIDs, queryParams = {}) {
+async function getHotelOffers(queryParams) {
   try {
-    if (!hotelIDs || hotelIDs.length === 0) {
-      throw new Error("No hotel IDs provided.");
-    }
-    
     const token = await getAccessToken();
     // Use the v3 endpoint for hotel offers.
     const endpoint = 'https://test.api.amadeus.com/v3/shopping/hotel-offers';
     const url = new URL(endpoint);
     
+    // Extract hotelIds from queryParams
+    if (!queryParams.hotelIds || queryParams.hotelIds.length === 0) {
+      throw new Error("No hotel IDs provided in the request parameters.");
+    }
+    
     // Append hotelIds as a comma-separated string.
-    url.searchParams.append('hotelIds', hotelIDs.join(','));
+    url.searchParams.append('hotelIds', queryParams.hotelIds.join(','));
+    
+    // Create a copy of queryParams without the hotelIds to avoid duplicate parameters
+    const otherParams = { ...queryParams };
+    delete otherParams.hotelIds;
     
     // Append any additional query parameters provided.
-    Object.keys(queryParams).forEach(key => {
-      url.searchParams.append(key, queryParams[key]);
+    Object.keys(otherParams).forEach(key => {
+      url.searchParams.append(key, otherParams[key]);
     });
     
     // Append currency if not already provided.

@@ -142,6 +142,94 @@ const functionDefinitions = {
             },
             required: ["cityCode"]
         }
+    },
+    hotelPrices: {
+      name: "hotelPrices",
+      description: "Get hotel prices based on the provided parameters",
+      parameters: {
+        type: "OBJECT",
+        properties: {
+          hotelNames: {
+            type: "ARRAY",
+            description: "Array of hotel names to get prices for.",
+            items: {
+                type: "STRING",
+            }
+          },
+          adults: {
+            type: "INTEGER",
+            description: `Number of adult guests (1-9) per room.`
+          },
+          checkInDate: {
+            type: "STRING",
+            description: `Check-in date of the stay (hotel local date). 
+            Format YYYY-MM-DD. The lowest accepted value is the present date 
+            (no dates in the past). If not present, the default value will be 
+            today's date in the GMT time zone.`
+          },
+          checkOutDate: {
+            type: "STRING",
+            description: `Check-out date of the stay (hotel local date). 
+            Format YYYY-MM-DD. The lowest accepted value is checkInDate+1. 
+            If not present, it will default to checkInDate +1.`
+          },
+          countryOfResidence: {
+            type: "STRING",
+            description: `Code of the country of residence of the traveler expressed using 
+            ISO 3166-1 format.`
+          },
+          roomQuantity: {
+            type: "INTEGER",
+            description: `Number of rooms requested (1-9).`
+          },
+          priceRange: {
+            type: "STRING",
+            description: `Filter hotel offers by price per night interval 
+            (ex: 200-300 or -300 or 100).
+            It is mandatory to include a currency when this field is set.`
+          },
+          currency: {
+            type: "STRING",
+            description: `Use this parameter to request a specific currency. 
+            ISO currency code (http://www.iso.org/iso/home/standards/currency_codes.htm).
+            If a hotel does not support the requested currency, the prices for the hotel 
+            will be returned in the local currency of the hotel.`
+          },
+          paymentPolicy: {
+            type: "STRING",
+            description: `Filter the response based on a specific payment type. 
+            NONE means all types (default).`,
+            enum: ["GUARANTEE", "DEPOSIT", "NONE"]
+          },
+          boardType: {
+            type: "STRING",
+            description: `Filter response based on available meals:
+            - ROOM_ONLY = Room Only
+            - BREAKFAST = Breakfast
+            - HALF_BOARD = Diner & Breakfast (only for Aggregators)
+            - FULL_BOARD = Full Board (only for Aggregators)
+            - ALL_INCLUSIVE = All Inclusive (only for Aggregators)`,
+            enum: ["ROOM_ONLY", "BREAKFAST", "HALF_BOARD", "FULL_BOARD", "ALL_INCLUSIVE"]
+          },
+          includeClosed: {
+            type: "BOOLEAN",
+            description: `Show all properties (include sold out) or available only. 
+            For sold out properties, please check availability on other dates.`
+          },
+          bestRateOnly: {
+            type: "BOOLEAN",
+            description: `Used to return only the cheapest offer per hotel or all available offers.`
+          },
+          lang: {
+            type: "STRING",
+            description: `Requested language of descriptive texts.
+            Examples: FR , fr , fr-FR.
+            If a language is not available the text will be returned in english.
+            ISO language code (https://www.iso.org/iso-639-language-codes.html).`
+          }
+        },
+        required: ["hotelNames"]
+      }
     }
 }
 
