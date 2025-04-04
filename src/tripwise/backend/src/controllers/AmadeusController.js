@@ -153,49 +153,70 @@ async function getHotelOffers(queryParams) {
 
 /**
  * Get hotel reviews and sentiments from Amadeus
- * @param {string} hotelId - The hotel ID
+ * @param {string[]} hotelIds - An array of hotel IDs
  * @returns {Promise<Object>} - Reviews data
  */
-async function getHotelReviews(hotelId) {
-  try {
-    // Get access token
-    const token = await getAccessToken();
-    
-    // The hotel sentiments endpoint
-    const endpoint = 'https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments';
-    const url = new URL(endpoint);
-    
-    // Add the hotel ID to the URL params
-    url.searchParams.append('hotelIds', hotelId);
-    
-    console.log(`Fetching hotel reviews for ${hotelId} from: ${url.toString()}`);
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token.access_token}`
-      }
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error fetching hotel reviews: ${response.statusText}`, errorText);
-      throw new Error(`Error fetching hotel reviews: ${response.statusText}`);
+async function getHotelReviews(hotelIds) {
+    try {
+        // Get access token
+        const token = await getAccessToken();
+
+        // The hotel sentiments endpoint
+        const endpoint = 'https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments';
+        const url = new URL(endpoint);
+
+        // Ensure hotelIds is an array
+        if (!Array.isArray(hotelIds)) {
+            throw new Error("hotelIds must be an array");
+        }
+
+        // Split the hotelIds into chunks of 3
+        const hotelIdChunks = [];
+        for (let i = 0; i < hotelIds.length; i += 3) {
+            hotelIdChunks.push(hotelIds.slice(i, i + 3));
+        }
+
+        let allReviews = [];
+
+        // Fetch reviews for each chunk
+        for (const chunk of hotelIdChunks) {
+            // Add the hotel IDs to the URL params
+            url.searchParams.append('hotelIds', chunk.join(','));
+
+            console.log(`Fetching hotel reviews for ${chunk.join(',')} from: ${url.toString()}`);
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.access_token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Error fetching hotel reviews: ${response.statusText}`, errorText);
+                throw new Error(`Error fetching hotel reviews: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log(`Received review data for ${chunk.join(',')}:`, data);
+
+            if (data && data.data) {
+                allReviews = allReviews.concat(data.data);
+            }
+        }
+
+        return { data: allReviews };
+    } catch (error) {
+        console.error("Error in getHotelReviews:", error);
+
+        // Check if this is an API subscription issue
+        if (error.response && error.response.status === 403) {
+            console.error("Possible API subscription issue - Hotel Ratings API may not be enabled");
+        }
+
+        throw error;
     }
-    
-    const data = await response.json();
-    console.log(`Received review data for ${hotelId}:`, data);
-    return data;
-  } catch (error) {
-    console.error("Error in getHotelReviews:", error);
-    
-    // Check if this is an API subscription issue
-    if (error.response && error.response.status === 403) {
-      console.error("Possible API subscription issue - Hotel Ratings API may not be enabled");
-    }
-    
-    throw error;
-  }
 }
 
 module.exports = {

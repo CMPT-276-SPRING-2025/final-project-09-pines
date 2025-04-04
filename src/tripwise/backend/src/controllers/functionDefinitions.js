@@ -230,6 +230,24 @@ const functionDefinitions = {
         },
         required: ["hotelNames"]
       }
+    },
+    hotelReviews: {
+      name: "hotelReviews",
+      description: "Get hotel reviews based on the provided parameters",
+      parameters: {
+        type: "OBJECT",
+        properties: {
+          hotelIds: {
+            type: "ARRAY",
+            description: `Comma-separated list of Amadeus Hotel Ids (max. 3). 
+            Amadeus Hotel Ids are found in the Hotel Search response (parameter name is 'hotelId').`,
+            items: {
+              type: "STRING",
+            }
+          }
+        },
+        required: ["hotelIds"]
+      }
     }
 }
 

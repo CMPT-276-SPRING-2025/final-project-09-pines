@@ -12,7 +12,7 @@ const { functionDefinitions } = require('./functionDefinitions');
 // Mapping between features and function definitions
 const featureFunctionMap = {
     travel: [functionDefinitions.searchFlights, functionDefinitions.listHotels, functionDefinitions.hotelPrices],
-    // Add other features and their function definitions here
+    review: [functionDefinitions.hotelReviews]
 };
 
 // Use your API key from environment variables
@@ -28,7 +28,7 @@ const titleCase = (str) => {
     return str.toLowerCase().split(' ').map(function (word) {
       return (word.charAt(0).toUpperCase() + word.slice(1));
     }).join(' ');
-  };
+};
 
 async function searchFlights(searchParams) {
     try {
@@ -219,6 +219,8 @@ exports.handleChat = async (req, res) => {
                     functionResponse = await listHotels(functionArgs);
                 } else if (functionName === "hotelPrices") {
                     functionResponse = await hotelPrices(functionArgs);
+                } else if (functionName === "hotelReviews") {
+                    functionResponse = await Amadeus.getHotelReviews(functionArgs.hotelIds);
                 } else {
                     return res.status(400).json({ message: `Unknown function: ${functionName}` });
                 }
@@ -226,9 +228,15 @@ exports.handleChat = async (req, res) => {
                 console.log("Function response:", functionResponse);
 
                 // Create function response prompt
-                const functionDataPrompt = functionName === "searchFlights"
-                    ? "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse)
-                    : "Please convert the following hotel offer data into a friendly, human-readable summary, using proper noun casing for the hotel names. It should not just be a list of hotels but have nicer formatting. Choose the best 5:\n" + JSON.stringify(functionResponse);
+                let functionDataPrompt;
+                if (functionName === "searchFlights") {
+                    functionDataPrompt = "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse);
+                } else if (functionName === "hotelReviews") {
+                    functionDataPrompt = "Please convert the following hotel review data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse);
+                }
+                else {
+                    functionDataPrompt = "Please convert the following hotel offer data into a friendly, human-readable summary, using proper noun casing for the hotel names. It should not just be a list of hotels but have nicer formatting. Choose the best 5:\n" + JSON.stringify(functionResponse);
+                }
 
                 // Add the function response request to conversation history
                 conversationHistory.push({ role: "user", parts: [{ text: functionDataPrompt }] });
