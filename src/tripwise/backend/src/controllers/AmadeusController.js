@@ -97,23 +97,29 @@ async function getHotelsByCity(queryParams) {
         throw error;
     }
 }
-async function getHotelOffers(hotelIDs, queryParams = {}) {
+
+async function getHotelOffers(queryParams) {
   try {
-    if (!hotelIDs || hotelIDs.length === 0) {
-      throw new Error("No hotel IDs provided.");
-    }
-    
     const token = await getAccessToken();
     // Use the v3 endpoint for hotel offers.
     const endpoint = 'https://test.api.amadeus.com/v3/shopping/hotel-offers';
     const url = new URL(endpoint);
     
+    // Extract hotelIds from queryParams
+    if (!queryParams.hotelIds || queryParams.hotelIds.length === 0) {
+      throw new Error("No hotel IDs provided in the request parameters.");
+    }
+    
     // Append hotelIds as a comma-separated string.
-    url.searchParams.append('hotelIds', hotelIDs.join(','));
+    url.searchParams.append('hotelIds', queryParams.hotelIds.join(','));
+    
+    // Create a copy of queryParams without the hotelIds to avoid duplicate parameters
+    const otherParams = { ...queryParams };
+    delete otherParams.hotelIds;
     
     // Append any additional query parameters provided.
-    Object.keys(queryParams).forEach(key => {
-      url.searchParams.append(key, queryParams[key]);
+    Object.keys(otherParams).forEach(key => {
+      url.searchParams.append(key, otherParams[key]);
     });
     
     // Append currency if not already provided.
@@ -145,9 +151,78 @@ async function getHotelOffers(hotelIDs, queryParams = {}) {
   }
 }
 
+/**
+ * Get hotel reviews and sentiments from Amadeus
+ * @param {string[]} hotelIds - An array of hotel IDs
+ * @returns {Promise<Object>} - Reviews data
+ */
+async function getHotelReviews(hotelIds) {
+    try {
+        // Get access token
+        const token = await getAccessToken();
+
+        // The hotel sentiments endpoint
+        const endpoint = 'https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments';
+        const url = new URL(endpoint);
+
+        // Ensure hotelIds is an array
+        if (!Array.isArray(hotelIds)) {
+            throw new Error("hotelIds must be an array");
+        }
+
+        // Split the hotelIds into chunks of 3
+        const hotelIdChunks = [];
+        for (let i = 0; i < hotelIds.length; i += 3) {
+            hotelIdChunks.push(hotelIds.slice(i, i + 3));
+        }
+
+        let allReviews = [];
+
+        // Fetch reviews for each chunk
+        for (const chunk of hotelIdChunks) {
+            // Add the hotel IDs to the URL params
+            url.searchParams.append('hotelIds', chunk.join(','));
+
+            console.log(`Fetching hotel reviews for ${chunk.join(',')} from: ${url.toString()}`);
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.access_token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Error fetching hotel reviews: ${response.statusText}`, errorText);
+                throw new Error(`Error fetching hotel reviews: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log(`Received review data for ${chunk.join(',')}:`, data);
+
+            if (data && data.data) {
+                allReviews = allReviews.concat(data.data);
+            }
+        }
+
+        return { data: allReviews };
+    } catch (error) {
+        console.error("Error in getHotelReviews:", error);
+
+        // Check if this is an API subscription issue
+        if (error.response && error.response.status === 403) {
+            console.error("Possible API subscription issue - Hotel Ratings API may not be enabled");
+        }
+
+        throw error;
+    }
+}
+
 module.exports = {
   getAccessToken,
   getFlightOffers,
   getHotelsByCity,
-  getHotelOffers
+  getHotelOffers,
+  getHotelReviews
 };

@@ -1,0 +1,138 @@
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .loading-animation {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    overflow: visible;
+  }
+  
+  .plane-container {
+    position: relative;
+    height: 60px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .plane {
+    position: absolute;
+    color: #0288d1;
+    font-size: 2rem;
+    filter: drop-shadow(0 4px 6px rgba(2, 136, 209, 0.2));
+    animation: fly 3s ease-in-out infinite;
+    z-index: 10;
+  }
+  
+  .loading-track {
+    position: relative;
+    height: 6px;
+    background-color: rgba(2, 136, 209, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  
+  .loading-track-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #0288d1, #03a9f4);
+    border-radius: 3px;
+    animation: fill 3s ease-in-out infinite;
+  }
+  
+  .loading-message {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #0288d1;
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Animation for the plane flying from search bar */
+  .plane-takeoff {
+    animation: takeoff 0.8s ease-out forwards, fly 3s ease-in-out infinite 0.8s;
+  }
+  
+  @keyframes takeoff {
+    0% {
+      transform: translateX(-100%) translateY(50px) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(-10%) translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fly {
+    0% {
+      transform: translateX(-10%) translateY(0px);
+    }
+    25% {
+      transform: translateX(30%) translateY(-10px);
+    }
+    50% {
+      transform: translateX(60%) translateY(0px);
+    }
+    75% {
+      transform: translateX(90%) translateY(-10px);
+    }
+    100% {
+      transform: translateX(110%) translateY(0px);
+    }
+  }
+  
+  @keyframes fill {
+    0% {
+      width: 0%;
+    }
+    50% {
+      width: 100%;
+    }
+    100% {
+      width: 0%;
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.7;
+    }
+  }
+  
+  @media (min-width: 2000px) {
+    .loading-message {
+      font-size: 2rem;
+    }
+    .plane {
+      font-size: 3rem;
+    }
+    .loading-animation {
+      max-width: 600px;
+    }
+    .loading-track {
+      height: 10px;
+      border-radius: 5px;
+    }
+  }
+  
