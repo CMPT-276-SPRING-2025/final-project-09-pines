@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./Home.css";
 import LoadingAnimation from "../components/LoadingAnimation";
+import { clearChat } from "../services/gemini.ts";
 
 // Define types for feature keys and data structure
 type FeatureKey = "plan" | "on-the-go" | "recommend" | "travel" | "review" | "alert";
@@ -49,6 +50,20 @@ function Home() {
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey>("plan");
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Clear chat history when Home page is loaded
+  useEffect(() => {
+    // Clear localStorage for all feature chats
+    const features = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
+    features.forEach(feat => {
+      localStorage.removeItem(`chatHistory-${feat}`);
+    });
+    
+    // Clear the backend chat history
+    clearChat()
+      .then(() => console.log("Backend chat history cleared on Home page load"))
+      .catch(error => console.error("Error clearing backend chat history:", error));
+  }, []);
 
   // Handle feature button click and update selected feature
   const handleFeatureClick = (feature: FeatureKey) => {

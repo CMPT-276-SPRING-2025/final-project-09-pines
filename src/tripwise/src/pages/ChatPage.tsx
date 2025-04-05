@@ -18,29 +18,7 @@ function ChatPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
     const hasFetchedInitialRequest = useRef(false);
-
-    // Function to extract hotel names from previous messages
-    const extractHotelsFromMessages = (messages: { type: string, text: string }[]): string[] => {
-        const hotelMentions: string[] = [];
-        
-        // Look through bot messages for hotel mentions
-        messages.forEach(message => {
-            if (message.type === "gemini") {
-                // Simple regex to find hotel names - can be improved
-                const hotelMatches = message.text.match(/(?:hotel|Hotel|HOTEL)\s[A-Za-z\s\d]+/gi);
-                if (hotelMatches) {
-                    hotelMatches.forEach(match => {
-                        const hotelName = match.replace(/(?:hotel|Hotel|HOTEL)\s/i, '').trim();
-                        if (hotelName && !hotelMentions.includes(hotelName)) {
-                            hotelMentions.push(hotelName);
-                        }
-                    });
-                }
-            }
-        });
-        
-        return hotelMentions;
-    };
+    const hasInitializedFeature = useRef<string | null>(null);
 
     // Scroll to bottom of messages whenever messages change
     useEffect(() => {
@@ -67,6 +45,63 @@ function ChatPage() {
         }
     }, []);
 
+    // Get the welcome message for a given feature
+    const getWelcomeMessage = (featureType: string) => {
+        switch (featureType) {
+            case "plan":
+                return "Hi there! I'm your travel planning assistant. What trip would you like to plan?";
+            case "on-the-go":
+                return "Need help while traveling? I can provide real-time assistance with translations, directions, and local recommendations.";
+            case "recommend":
+                return "Looking for travel recommendations? Tell me your preferences and I'll suggest destinations, activities, and experiences.";
+            case "travel":
+                return "Ready to book your travel? I can help you find flights, hotels, and packages. Where would you like to go?";
+            case "review":
+                return "Looking for travel reviews? I can help you find information about hotels, restaurants, and attractions. What would you like to know about?";
+            case "alert":
+                return "I can keep you updated on travel alerts and changes. What would you like to be notified about?";
+            default:
+                return "Hello! How can I assist with your travel needs today?";
+        }
+    };
+
+    // Load chat history from localStorage on component mount or feature change
+    useEffect(() => {
+        if (!feature) return;
+        
+        // Check if we're switching to a different feature
+        if (hasInitializedFeature.current !== feature) {
+            // Try to load stored messages
+            const storedMessages = localStorage.getItem(`chatHistory-${feature}`);
+            let parsedMessages: { type: string, text: string }[] = [];
+            
+            if (storedMessages) {
+                try {
+                    parsedMessages = JSON.parse(storedMessages);
+                    // If we have stored messages, use them
+                    if (parsedMessages.length > 0) {
+                        setMessages(parsedMessages);
+                        hasInitializedFeature.current = feature;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Error parsing stored messages:", e);
+                }
+            }
+            
+            // No stored messages or error parsing, so use welcome message
+            setMessages([{ type: "gemini", text: getWelcomeMessage(feature) }]);
+            hasInitializedFeature.current = feature;
+        }
+    }, [feature]);
+
+    // Save chat history to localStorage whenever messages change
+    useEffect(() => {
+        if (feature && messages.length > 0) {
+            localStorage.setItem(`chatHistory-${feature}`, JSON.stringify(messages));
+        }
+    }, [messages, feature]);
+
     // On mount, if there's a query from Home, use it as the first user message.
     useEffect(() => {
         if (feature && query && !hasFetchedInitialRequest.current) {
@@ -84,34 +119,6 @@ function ChatPage() {
                     setMessages([{ type: "user", text: query }, { type: "gemini", text: "Error fetching response" }]);
                     setIsProcessing(false);
                 });
-        } else if (feature && !query) {
-            // Display a welcome message for the feature
-            let welcomeMessage = "";
-            
-            switch (feature) {
-                case "plan":
-                    welcomeMessage = "Hi there! I'm your travel planning assistant. What trip would you like to plan?";
-                    break;
-                case "on-the-go":
-                    welcomeMessage = "Need help while traveling? I can provide real-time assistance with translations, directions, and local recommendations.";
-                    break;
-                case "recommend":
-                    welcomeMessage = "Looking for travel recommendations? Tell me your preferences and I'll suggest destinations, activities, and experiences.";
-                    break;
-                case "travel":
-                    welcomeMessage = "Ready to book your travel? I can help you find flights, hotels, and packages. Where would you like to go?";
-                    break;
-                case "review":
-                    welcomeMessage = "Looking for travel reviews? I can help you find information about hotels, restaurants, and attractions. What would you like to know about?";
-                    break;
-                case "alert":
-                    welcomeMessage = "I can keep you updated on travel alerts and changes. What would you like to be notified about?";
-                    break;
-                default:
-                    welcomeMessage = "Hello! How can I assist with your travel needs today?";
-            }
-            
-            setMessages([{ type: "gemini", text: welcomeMessage }]);
         }
     }, [feature, query, location]);
 
@@ -157,107 +164,50 @@ function ChatPage() {
         }
     };
 
-    const requestHotelReview = ({ name, id }: { name: string, id: string }) => {
-        setProcessingHotel(id);
-        
-        if (feature === "review") {
-            const reviewQuery = `Can you provide reviews for hotel ID: ${id}`;
-            sendMessage(reviewQuery);
-        } else {
-            // First show that we're processing the request
-            setIsProcessing(true);
-            
-            handleFeatureClick("review").then(() => {
-                // Wait a bit longer to ensure feature change is complete
-                setTimeout(() => {
-                    const reviewQuery = `Can you provide reviews for hotel ID: ${id}`;
-                    sendMessage(reviewQuery);
-                }, 1000); // Increased timeout to 1000ms
-            });
-        }
-    };
-
     const handleFeatureClick = async (newFeature: string) => {
+        if (newFeature === feature) return; // No need to switch if already on this feature
+        
         setIsProcessing(true);
         
-        try {
-
-            // Only after clearing, reset messages
-            setMessages([]);
-            
-            // If switching to review feature, check for hotel mentions in previous messages
-            if (newFeature === "review" && feature !== "review") {
-                const recentHotels = extractHotelsFromMessages(messages);
-                
-                // If we found hotels, suggest them for review
-                if (recentHotels.length > 0) {
-                    setTimeout(() => {
-                        setMessages([{ 
-                            type: "gemini", 
-                            text: `I see you were looking at ${recentHotels.join(', ')}. Would you like to see reviews for any of these hotels?` 
-                        }]);
-                        setIsProcessing(false);
-                    }, 300);
-                } else {
-                    setTimeout(() => {
-                        setMessages([{ 
-                            type: "gemini", 
-                            text: "What hotel or destination would you like to read reviews about?" 
-                        }]);
-                        setIsProcessing(false);
-                    }, 300);
-                }
-            } else {
-                // For other features, show a welcome message
-                let welcomeMessage = "";
-                
-                switch (newFeature) {
-                    case "plan":
-                        welcomeMessage = "Hi there! I'm your travel planning assistant. What trip would you like to plan?";
-                        break;
-                    case "on-the-go":
-                        welcomeMessage = "Need help while traveling? I can provide real-time assistance with translations, directions, and local recommendations.";
-                        break;
-                    case "recommend":
-                        welcomeMessage = "Looking for travel recommendations? Tell me your preferences and I'll suggest destinations, activities, and experiences.";
-                        break;
-                    case "travel":
-                        welcomeMessage = "Ready to book your travel? I can help you find flights, hotels, and packages. Where would you like to go?";
-                        break;
-                    case "review":
-                        welcomeMessage = "Looking for travel reviews? I can help you find information about hotels, restaurants, and attractions. What would you like to know about?";
-                        break;
-                    case "alert":
-                        welcomeMessage = "I can keep you updated on travel alerts and changes. What would you like to be notified about?";
-                        break;
-                    default:
-                        welcomeMessage = "Hello! How can I assist with your travel needs today?";
-                }
-                
-                setTimeout(() => {
-                    setMessages([{ type: "gemini", text: welcomeMessage }]);
-                    setIsProcessing(false);
-                }, 300);
-            }
-            
-            // Navigate to the new feature
-            navigate(`/${newFeature}`);
-            
-        } catch (error) {
-            console.error("Error during feature switch:", error);
-            setIsProcessing(false);
+        // Save current messages before switching
+        if (feature && messages.length > 0) {
+            localStorage.setItem(`chatHistory-${feature}`, JSON.stringify(messages));
         }
+        
+        // Reset the initialization flag so the useEffect will handle loading messages
+        hasInitializedFeature.current = null;
+        
+        // Navigate to the new feature - this will trigger the useEffect to load messages
+        navigate(`/${newFeature}`);
+        setIsProcessing(false);
         
         return Promise.resolve(); // Return a promise for chaining
     };
 
     const goHome = () => {
-        navigate("/");
-    };
+        const confirmLeave = window.confirm(
+            "Warning: Going back will erase the current travel planning session. Are you sure?"
+        );
 
-    // Handle clicks on hotel links in messages
-    const handleHotelLinkClick = (hotelId: string, hotelName: string) => {
-        requestHotelReview({ name: hotelName, id: hotelId });
+        if (confirmLeave) {
+            // Clear localStorage for all feature chats
+            features.forEach(feat => {
+                localStorage.removeItem(`chatHistory-${feat}`);
+            });
+
+            // Reset all state
+            setMessages([]);
+            hasInitializedFeature.current = null;
+            hasFetchedInitialRequest.current = false;
+
+            // Clear the backend chat history
+            clearChat()
+                .then(() => console.log("Backend chat history cleared"))
+                .catch(error => console.error("Error clearing backend chat history:", error));
+
+            // Navigate to home page
+            navigate("/");
+        }
     };
 
     const saveChat = () => {
@@ -267,24 +217,7 @@ function ChatPage() {
 
     // Create properly typed markdown components
     const markdownComponents: Components = {
-        a: ({ node, children, href, ...props }: any) => {
-            // Handle hotel ID links specially
-            if (href?.startsWith('#hotelId=')) {
-                const hotelId = href.replace('#hotelId=', '');
-                const hotelName = String(children || 'Hotel');
-                const isProcessingThisHotel = processingHotel === hotelId;
-                
-                return (
-                    <button 
-                        className={`hotel-link ${isProcessingThisHotel ? 'processing' : ''}`}
-                        onClick={() => handleHotelLinkClick(hotelId, hotelName)}
-                        type="button"
-                        disabled={isProcessing || isProcessingThisHotel}
-                    >
-                        {isProcessingThisHotel ? 'Loading...' : children}
-                    </button>
-                );
-            }
+        a: ({ children, href, ...props }: any) => {
             return <a href={href} {...props}>{children}</a>;
         }
     };
