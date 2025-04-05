@@ -11,7 +11,7 @@ class RecommendPrompt {
         consider the user's past travel history, budget, and travel style.
         Ask clarifying questions to understand the user's interests and preferences.
         Suggest a variety of options for destinations, activities, and experiences, and provide 
-        detailed information about each option.`;s
+        detailed information about each option.`;
 
         return prompt;
     }
