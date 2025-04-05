@@ -185,23 +185,29 @@ function ChatPage() {
     };
 
     const goHome = () => {
-        // Clear localStorage for all feature chats
-        features.forEach(feat => {
-            localStorage.removeItem(`chatHistory-${feat}`);
-        });
-        
-        // Reset all state
-        setMessages([]);
-        hasInitializedFeature.current = null;
-        hasFetchedInitialRequest.current = false;
-        
-        // Clear the backend chat history
-        clearChat()
-            .then(() => console.log("Backend chat history cleared"))
-            .catch(error => console.error("Error clearing backend chat history:", error));
-        
-        // Navigate to home page
-        navigate("/");
+        const confirmLeave = window.confirm(
+            "Warning: Going back will erase the current travel planning session. Are you sure?"
+        );
+
+        if (confirmLeave) {
+            // Clear localStorage for all feature chats
+            features.forEach(feat => {
+                localStorage.removeItem(`chatHistory-${feat}`);
+            });
+
+            // Reset all state
+            setMessages([]);
+            hasInitializedFeature.current = null;
+            hasFetchedInitialRequest.current = false;
+
+            // Clear the backend chat history
+            clearChat()
+                .then(() => console.log("Backend chat history cleared"))
+                .catch(error => console.error("Error clearing backend chat history:", error));
+
+            // Navigate to home page
+            navigate("/");
+        }
     };
 
     const saveChat = () => {
