@@ -3,6 +3,4 @@
 
 project title : TripWise
 
-group members : Muneeb Kamran, Mitch brown, Mirza Baig, Chris Reeder 
-
 Description : Our project is a web app designed to help travelers plan trips while staying in their budget. The app will help provide affordable travel options, real time recommendations, and will also have an AI chatbot assistant to help the user with any other queries. Our main goal is to make the process of travelling on a budget efficient and personalized. 
