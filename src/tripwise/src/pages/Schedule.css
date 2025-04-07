@@ -342,6 +342,7 @@
   height: 100%; /* Make sure activity item fills the positioned container */
   container-type: inline-size;
   container-name: activity;
+  overflow: hidden;  /* Clips any overflowing content */
 }
 
 .activity-item.dragging {
@@ -435,7 +436,13 @@
 }
 
 .activity-content {
-  overflow: hidden; /* Hide overflowing content */
+  overflow: visible; /* Let text flow instead of being hidden */
+}
+
+.activity-description {
+  -webkit-line-clamp: unset;  /* Remove line clamping */
+  display: block;
+  white-space: normal;  /* Allow wrapping */
 }
 
 /* Category colors */
