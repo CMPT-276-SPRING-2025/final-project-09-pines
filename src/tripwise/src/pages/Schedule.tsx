@@ -169,6 +169,18 @@ const DayColumn = ({ day, date, activities, onDrop, onEdit, onDelete }: DayColum
   // Filter activities for this day
   const dayActivities = activities.filter((activity) => activity.day === day)
 
+  const calculateActivityPosition = (activity: Activity) => {
+    const [hours, minutes] = activity.startTime.split(":").map(Number)
+    const startHour = hours + minutes / 60
+    const topPosition = (startHour - 6) * 60 // 6 is the starting hour, 60px is the height of 1 hour
+    const activityHeight = (activity.duration / 60) * 60 // duration in hours * 60px per hour
+
+    return {
+      top: `${topPosition}px`,
+      height: `${activityHeight}px`,
+    }
+  }
+
   return (
     <div className="day-column">
       <div className="day-header">
@@ -182,12 +194,14 @@ const DayColumn = ({ day, date, activities, onDrop, onEdit, onDelete }: DayColum
 
         {/* Position activities over the time slots */}
         {dayActivities.map((activity) => {
-          const [hours, minutes] = activity.startTime.split(":").map(Number)
-          const startHour = hours + minutes / 60
-          const topPosition = (startHour - 6) * 60 // 6 is the starting hour, 60px is the height of 1 hour
+          const position = calculateActivityPosition(activity)
 
           return (
-            <div key={activity.id} className="positioned-activity" style={{ top: `${topPosition}px` }}>
+            <div
+              key={activity.id}
+              className="positioned-activity"
+              style={{ top: position.top, height: position.height }}
+            >
               <ActivityItem activity={activity} onEdit={onEdit} onDelete={onDelete} />
             </div>
           )

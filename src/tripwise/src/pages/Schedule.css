@@ -286,12 +286,14 @@
 
 .time-slots {
   position: relative;
+  z-index: 0; /* Ensure time slots are behind activities */
 }
 
 .time-slot {
   height: 60px;
   border-bottom: 1px solid #e0e0e0;
   position: relative;
+  z-index: 1; /* Lower than events */
 }
 
 .time-slot:hover {
@@ -317,25 +319,27 @@
 .positioned-activity {
   position: absolute;
   left: 0;
-  right: 0;
-  padding: 0 0.5rem;
-  z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 10; /* A higher z-index */
 }
 
 .activity-item {
-  background: white;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #0288d1;
-  cursor: move;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.activity-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff !important; /* force opaque white background */
+  margin-bottom: 0; /* remove extra gap to prevent grid lines showing through */
+  border-left: 4px solid;
+  border-radius: 4px;
+  padding: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  justify-content: flex-start; /* Align items to the start */
+  align-items: stretch; /* Stretch items to fill the container */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: grab;
+  height: 100%; /* Make sure activity item fills the positioned container */
 }
 
 .activity-item.dragging {
