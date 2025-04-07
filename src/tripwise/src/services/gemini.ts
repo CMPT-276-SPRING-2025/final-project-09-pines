@@ -1,3 +1,5 @@
+import API_CONFIG from '../config/api';
+
 export async function fetchChatResponse(feature: string, query: string): Promise<string> {
   try {
     console.log(`Sending request to ${feature} endpoint with query: "${query}"`);
@@ -6,9 +8,8 @@ export async function fetchChatResponse(feature: string, query: string): Promise
     const today = new Date();
     const currentDate = today.toLocaleDateString();
     
-    // Build the endpoint URL according to the feature
-    const endpoint = "http://localhost:5001/api/chat";
-
+    // Build the endpoint URL using the config
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CHAT}`;
       
     console.log("Calling endpoint:", endpoint);
     
@@ -53,24 +54,24 @@ export async function fetchChatResponse(feature: string, query: string): Promise
 }
 
 export async function clearChat(): Promise<void> {
-try {
-  const endpoint = "http://localhost:5001/api/clearChat";
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CLEAR_CHAT}`;
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Server error response:", errorText);
-    throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server error response:", errorText);
+      throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+    }
+
+    console.log("Chat history cleared successfully");
+  } catch (error) {
+    console.error("Error clearing chat history:", error);
+    throw error;
   }
-
-  console.log("Chat history cleared successfully");
-} catch (error) {
-  console.error("Error clearing chat history:", error);
-  throw error;
-}
 }

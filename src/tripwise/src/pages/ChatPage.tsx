@@ -16,7 +16,7 @@ function ChatPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [processingHotel, setProcessingHotel] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review", "alert"];
+    const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review",];
     const hasFetchedInitialRequest = useRef(false);
     const hasInitializedFeature = useRef<string | null>(null);
 
