@@ -66,12 +66,27 @@ function Home() {
   }, []);
 
   // Handle feature button click and update selected feature
-  const handleFeatureClick = (feature: FeatureKey) => {
+  const handleFeatureClick = async (feature: FeatureKey) => {
     setSelectedFeature(feature);
+    
+    // If alert is clicked, navigate directly to the alerts page
+    if (feature === "alert") {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/alerts");
+    }
   };
 
   // Navigate to the selected feature's page when clicking the search bar
   const handleSearchClick = async () => {
+    if (selectedFeature === "alert") {
+      // Navigate directly to alerts page without query parameter
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/alerts");
+      return;
+    }
+    
     if (!query.trim()) return;
     
     setIsLoading(true);
