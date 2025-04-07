@@ -482,11 +482,19 @@ function Schedule() {
   const handleAddTrip = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const startDate = new Date(newTrip.startDate)
+    const endDate = new Date(newTrip.endDate)
+
+    if (endDate <= startDate) {
+      alert("End date must be after start date.")
+      return // Do not proceed if end date is not after start date
+    }
+
     const newTripObj: Trip = {
       id: `trip-${Date.now()}`,
       destination: newTrip.destination,
-      startDate: new Date(newTrip.startDate),
-      endDate: new Date(newTrip.endDate),
+      startDate: startDate,
+      endDate: endDate,
       notes: newTrip.notes,
       activities: [],
     }
