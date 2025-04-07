@@ -170,15 +170,16 @@ const DayColumn = ({ day, date, activities, onDrop, onEdit, onDelete }: DayColum
   const dayActivities = activities.filter((activity) => activity.day === day)
 
   const calculateActivityPosition = (activity: Activity) => {
-    const [hours, minutes] = activity.startTime.split(":").map(Number)
-    const startHour = hours + minutes / 60
-    const topPosition = (startHour - 6) * 60 // 6 is the starting hour, 60px is the height of 1 hour
-    const activityHeight = (activity.duration / 60) * 60 // duration in hours * 60px per hour
-
+    const [hours, minutes] = activity.startTime.split(":").map(Number);
+    const startInMinutes = hours * 60 + minutes;
+    const effectiveFactor = 61 / 60; // account for the extra 1px border per hour
+    const topPosition = (startInMinutes - 360) * effectiveFactor;
+    const activityHeight = activity.duration * effectiveFactor - 12;
+  
     return {
       top: `${topPosition}px`,
       height: `${activityHeight}px`,
-    }
+    };
   }
 
   return (

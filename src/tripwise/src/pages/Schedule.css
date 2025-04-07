@@ -329,7 +329,7 @@
   margin-bottom: 0; /* remove extra gap to prevent grid lines showing through */
   border-left: 4px solid;
   border-radius: 4px;
-  padding: 8px;
+  padding: 6px; /* Reduced padding */
   color: var(--text-primary);
   font-size: 0.875rem;
   display: flex;
@@ -340,6 +340,8 @@
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: grab;
   height: 100%; /* Make sure activity item fills the positioned container */
+  container-type: inline-size;
+  container-name: activity;
 }
 
 .activity-item.dragging {
@@ -349,6 +351,9 @@
 .activity-item.template {
   margin: 0.5rem;
   cursor: grab;
+  height: auto !important;
+  min-width: 150px;
+  padding: 0.5rem;
 }
 
 .activity-time {
@@ -359,9 +364,12 @@
 }
 
 .activity-title {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.1rem 0; /* Reduced margin */
   font-size: 1rem;
   color: #333;
+  white-space: nowrap; /* Prevent title from wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis if the title overflows */
 }
 
 .activity-location {
@@ -371,12 +379,20 @@
   font-size: 0.8rem;
   color: #666;
   margin-bottom: 0.25rem;
+  white-space: nowrap; /* Prevent location from wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis if the location overflows */
 }
 
 .activity-description {
   font-size: 0.8rem;
   color: #666;
   margin: 0;
+  overflow: hidden; /* Hide overflowing description */
+  text-overflow: ellipsis; /* Add ellipsis if the description overflows */
+  display: -webkit-box;
+  line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
 }
 
 .activity-actions {
@@ -416,6 +432,10 @@
 .activity-action-btn:hover {
   background: rgba(0, 0, 0, 0.05);
   transform: scale(1.1);
+}
+
+.activity-content {
+  overflow: hidden; /* Hide overflowing content */
 }
 
 /* Category colors */
@@ -763,5 +783,12 @@
   .add-custom-activity {
     padding: 1rem 2rem;
     font-size: 1.2rem;
+  }
+}
+
+/* When the activity-item’s height is less than 40px, hide the time */
+@container activity (max-height: 40px) {
+  .activity-time {
+    display: none;
   }
 }
