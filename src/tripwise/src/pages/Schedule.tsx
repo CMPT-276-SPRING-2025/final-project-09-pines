@@ -66,7 +66,7 @@ interface DayColumnProps {
 const ActivityItem = ({ activity, onEdit, onDelete, isTemplate = false }: ActivityItemProps) => {
   const [{ isDragging }, dragRef] = useDrag<DragItem, unknown, { isDragging: boolean }>(() => ({
     type: isTemplate ? "ACTIVITY_TEMPLATE" : "ACTIVITY",
-    item: { ...activity, isTemplate } as DragItem,
+    item: () => ({ ...activity, isTemplate }), // return latest data at drag time
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -341,42 +341,50 @@ function Schedule() {
   const [visibleDays, setVisibleDays] = useState<number[]>([1, 2, 3])
   const scheduleRef = useRef<HTMLDivElement>(null)
 
+  const formatTimeValue = (time: string) => {
+    const [h, m] = time.split(":")
+    return `${h.padStart(2, "0")}:${m}`
+  }
+
   // Handle dropping an activity onto a time slot
   const handleDrop = (item: DragItem, day: number, time: string) => {
     if (!selectedTrip) return
 
-    const newActivity: Activity = {
-      ...item,
-      id: item.isTemplate ? `activity-${Date.now()}` : item.id,
-      day: day,
-      startTime: time,
-    }
+    const formattedTime = formatTimeValue(time)
 
-    if (item.isTemplate) {
-      // Create a new activity from template
-      setTrips((prevTrips) =>
-        prevTrips.map((trip) =>
-          trip.id === selectedTrip.id
-            ? {
-                ...trip,
-                activities: [...trip.activities, newActivity],
-              }
-            : trip,
-        ),
-      )
-    } else {
-      // Move existing activity
-      setTrips((prevTrips) =>
-        prevTrips.map((trip) =>
-          trip.id === selectedTrip.id
-            ? {
-                ...trip,
-                activities: trip.activities.map((activity) => (activity.id === item.id ? newActivity : activity)),
-              }
-            : trip,
-        ),
-      )
-    }
+    setTrips((prevTrips) => {
+      return prevTrips.map((trip) => {
+        if (trip.id === selectedTrip.id) {
+          // Look up the current activity data
+          const currentActivityIndex = trip.activities.findIndex(activity => activity.id === item.id)
+
+          if (currentActivityIndex !== -1) {
+            // Activity exists, update it
+            const updatedActivities = [...trip.activities]
+            updatedActivities[currentActivityIndex] = {
+              ...updatedActivities[currentActivityIndex],
+              day: day,
+              startTime: formattedTime,
+            }
+            const updatedTrip = { ...trip, activities: updatedActivities }
+            setSelectedTrip(updatedTrip)
+            return updatedTrip
+          } else {
+            // Activity doesn't exist, add it
+            const newActivity: Activity = {
+              ...item,
+              id: item.isTemplate ? `activity-${Date.now()}` : item.id,
+              day: day,
+              startTime: formattedTime,
+            }
+            const updatedTrip = { ...trip, activities: [...trip.activities, newActivity] }
+            setSelectedTrip(updatedTrip)
+            return updatedTrip
+          }
+        }
+        return trip
+      })
+    })
   }
 
   // Handle adding a new activity
@@ -398,23 +406,36 @@ function Schedule() {
 
   // Handle editing an activity
   const handleEditActivity = (activity: Activity) => {
-    setEditingActivity(activity)
-    setIsAddingActivity(true)
-  }
+    if (!selectedTrip) return;
+
+    const updatedActivity = selectedTrip.activities.find((a) => a.id === activity.id);
+
+    if (updatedActivity) {
+      setEditingActivity({
+        ...updatedActivity,
+      });
+      setIsAddingActivity(true);
+    }
+  };
 
   // Handle deleting an activity
   const handleDeleteActivity = (activityId: string) => {
     if (!selectedTrip) return
 
+    const confirmDelete = window.confirm("Are you sure you want to delete this activity?")
+    if (!confirmDelete) return
+
     setTrips((prevTrips) =>
       prevTrips.map((trip) =>
         trip.id === selectedTrip.id
-          ? {
-              ...trip,
-              activities: trip.activities.filter((activity) => activity.id !== activityId),
-            }
+          ? { ...trip, activities: trip.activities.filter((activity) => activity.id !== activityId) }
           : trip,
-      ),
+      )
+    )
+
+    // Also update the selectedTrip's activities if needed.
+    setSelectedTrip((prev) =>
+      prev ? { ...prev, activities: prev.activities.filter((activity) => activity.id !== activityId) } : null,
     )
   }
 
@@ -424,19 +445,21 @@ function Schedule() {
     if (!selectedTrip || !editingActivity) return
 
     setTrips((prevTrips) =>
-      prevTrips.map((trip) =>
-        trip.id === selectedTrip.id
-          ? {
-              ...trip,
-              activities:
-                isAddingActivity && !trip.activities.find((a) => a.id === editingActivity.id)
-                  ? [...trip.activities, editingActivity]
-                  : trip.activities.map((activity) =>
-                      activity.id === editingActivity.id ? editingActivity : activity,
-                    ),
+        prevTrips.map((trip) => {
+            if (trip.id === selectedTrip.id) {
+                const updatedActivities =
+                    isAddingActivity && !trip.activities.find((a) => a.id === editingActivity.id)
+                        ? [...trip.activities, editingActivity]
+                        : trip.activities.map((activity) =>
+                              activity.id === editingActivity.id ? editingActivity : activity,
+                          )
+                const updatedTrip = { ...trip, activities: updatedActivities }
+                // Update selectedTrip with the new changes as well.
+                setSelectedTrip(updatedTrip)
+                return updatedTrip
             }
-          : trip,
-      ),
+            return trip
+        }),
     )
 
     setIsAddingActivity(false)
