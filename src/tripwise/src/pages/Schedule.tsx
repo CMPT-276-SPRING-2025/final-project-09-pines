@@ -329,6 +329,13 @@ function Schedule() {
   ]
 
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(trips[0])
+  const selectedTripIdRef = useRef<string | null>(selectedTrip?.id ?? null)
+
+  // Update ref whenever selectedTrip changes
+  useEffect(() => {
+    selectedTripIdRef.current = selectedTrip?.id ?? null
+  }, [selectedTrip])
+
   const [isAddingActivity, setIsAddingActivity] = useState(false)
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null)
   const [showAddTripForm, setShowAddTripForm] = useState(false)
@@ -348,15 +355,18 @@ function Schedule() {
 
   // Handle dropping an activity onto a time slot
   const handleDrop = (item: DragItem, day: number, time: string) => {
-    if (!selectedTrip) return
+    if (!selectedTripIdRef.current) return
 
     const formattedTime = formatTimeValue(time)
+    const currentTripId = selectedTripIdRef.current
 
     setTrips((prevTrips) => {
-      return prevTrips.map((trip) => {
-        if (trip.id === selectedTrip.id) {
+      const updatedTrips = prevTrips.map((trip) => {
+        if (trip.id === currentTripId) {
           // Look up the current activity data
-          const currentActivityIndex = trip.activities.findIndex(activity => activity.id === item.id)
+          const currentActivityIndex = trip.activities.findIndex(
+            (activity) => activity.id === item.id
+          )
 
           if (currentActivityIndex !== -1) {
             // Activity exists, update it
@@ -366,9 +376,7 @@ function Schedule() {
               day: day,
               startTime: formattedTime,
             }
-            const updatedTrip = { ...trip, activities: updatedActivities }
-            setSelectedTrip(updatedTrip)
-            return updatedTrip
+            return { ...trip, activities: updatedActivities }
           } else {
             // Activity doesn't exist, add it
             const newActivity: Activity = {
@@ -377,13 +385,17 @@ function Schedule() {
               day: day,
               startTime: formattedTime,
             }
-            const updatedTrip = { ...trip, activities: [...trip.activities, newActivity] }
-            setSelectedTrip(updatedTrip)
-            return updatedTrip
+            return { ...trip, activities: [...trip.activities, newActivity] }
           }
         }
         return trip
       })
+      // Update selectedTrip from the updated trips array
+      const newSelected = updatedTrips.find((trip) => trip.id === currentTripId)
+      if (newSelected) {
+        setSelectedTrip(newSelected)
+      }
+      return updatedTrips
     })
   }
 
