@@ -169,17 +169,63 @@ const DayColumn = ({ day, date, activities, onDrop, onEdit, onDelete }: DayColum
   // Filter activities for this day
   const dayActivities = activities.filter((activity) => activity.day === day)
 
+  // Helper: compute start in minutes for an event
+  const getStart = (activity: Activity) => {
+    const [h, m] = activity.startTime.split(":").map(Number)
+    return h * 60 + m
+  }
+
+  // Group overlapping events and assign layout: left offset (in px) & zIndex
+  const getOverlappingLayouts = (events: Activity[]) => {
+    const layouts: Record<string, { left: number; zIndex: number }> = {}
+    // sort by start time
+    const sorted = [...events].sort((a, b) => getStart(a) - getStart(b))
+    let group: Activity[] = []
+    let groupMaxEnd = 0
+
+    const flushGroup = () => {
+      group.forEach((event, i) => {
+        // Each subsequent event gets an extra 10px offset
+        layouts[event.id] = { left: i * 10, zIndex: i + 1 }
+      })
+      group = []
+    }
+
+    for (const event of sorted) {
+      const start = getStart(event)
+      const end = start + event.duration
+      if (group.length === 0) {
+        group.push(event)
+        groupMaxEnd = end
+      } else {
+        if (start < groupMaxEnd) {
+          // overlapping: add the event and update groupMaxEnd
+          group.push(event)
+          groupMaxEnd = Math.max(groupMaxEnd, end)
+        } else {
+          // no overlap: flush previous group and start new
+          flushGroup()
+          group.push(event)
+          groupMaxEnd = end
+        }
+      }
+    }
+    if (group.length) flushGroup()
+    return layouts
+  }
+
+  const layouts = getOverlappingLayouts(dayActivities)
+
   const calculateActivityPosition = (activity: Activity) => {
-    const [hours, minutes] = activity.startTime.split(":").map(Number);
-    const startInMinutes = hours * 60 + minutes;
-    const effectiveFactor = 61 / 60; // account for the extra 1px border per hour
-    const topPosition = (startInMinutes - 360) * effectiveFactor;
-    const activityHeight = activity.duration * effectiveFactor - 12;
-  
+    const [hours, minutes] = activity.startTime.split(":").map(Number)
+    const startInMinutes = hours * 60 + minutes
+    const effectiveFactor = 61 / 60 // account for extra 1px border per hour
+    const topPosition = (startInMinutes - 360) * effectiveFactor
+    const activityHeight = activity.duration * effectiveFactor - 12
     return {
       top: `${topPosition}px`,
       height: `${activityHeight}px`,
-    };
+    }
   }
 
   return (
@@ -196,12 +242,18 @@ const DayColumn = ({ day, date, activities, onDrop, onEdit, onDelete }: DayColum
         {/* Position activities over the time slots */}
         {dayActivities.map((activity) => {
           const position = calculateActivityPosition(activity)
-
+          const layout = layouts[activity.id] || { left: 0, zIndex: 1 }
           return (
             <div
               key={activity.id}
               className="positioned-activity"
-              style={{ top: position.top, height: position.height }}
+              style={{
+                top: position.top,
+                height: position.height,
+                left: `${layout.left}px`,
+                width: `calc(100% - ${layout.left}px)`,
+                zIndex: layout.zIndex,
+              }}
             >
               <ActivityItem activity={activity} onEdit={onEdit} onDelete={onDelete} />
             </div>
