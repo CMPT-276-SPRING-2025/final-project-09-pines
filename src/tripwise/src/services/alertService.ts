@@ -175,27 +175,36 @@ const alertService = {
   /**
    * Searches for airport and city codes for autocomplete.
    * @param {string} keyword - The search keyword.
-   * @returns {Promise<any[]>} - A promise that resolves with an array of location suggestions.
+   * @returns {Promise<{id: string, name: string, code: string, city: string, country: string, type: string}[]>} - A promise that resolves with an array of location suggestions.
    */
-  searchLocations: async (keyword: string): Promise<any[]> => {
+  searchLocations: async (keyword: string): Promise<{
+    id: string;
+    name: string;
+    code: string;
+    city: string;
+    country: string;
+    type: string;
+  }[]> => {
     try {
       if (!keyword || keyword.length < 2) {
         return [];
       }
-
       const response = await fetch(`${API_BASE_URL}/locations/search?keyword=${encodeURIComponent(keyword)}`);
-
       if (!response.ok) {
         throw new Error(`Error searching locations: ${response.statusText}`);
       }
-
       const data = await response.json();
-      return data.data.map((location: any) => ({
+      return (data.data as Array<{
+        iataCode: string;
+        name: string;
+        address?: { cityName: string; countryName: string };
+        subType: string;
+      }>).map((location) => ({
         id: location.iataCode,
         name: `${location.name} (${location.iataCode})`,
         code: location.iataCode,
-        city: location.address?.cityName,
-        country: location.address?.countryName,
+        city: location.address?.cityName || '',
+        country: location.address?.countryName || '',
         type: location.subType
       }));
     } catch (error) {
@@ -249,39 +258,31 @@ const alertService = {
   getHotelPrice: async (location: string, checkInDate: string, checkOutDate: string): Promise<{ price: number; currency: string }> => {
     try {
       console.log(`Fetching hotel prices for ${location} (${checkInDate} to ${checkOutDate})`);
-
       // Step 1: Convert location to cityCode using Amadeus location API
       const locationResponse = await fetch(`${API_CONFIG.BASE_URL}/locations/search?keyword=${encodeURIComponent(location)}`);
-
       if (!locationResponse.ok) {
         throw new Error(`Error searching location: ${locationResponse.statusText}`);
       }
-
       const locationData = await locationResponse.json();
-      const locationResults = locationData.data || [];
-
+      const locationResults = (locationData.data as Array<{
+        subType: string;
+        type: string;
+        iataCode: string;
+        name: string;
+        address?: { cityName: string; countryName: string };
+      }>) || [];
       // Find the first city in results
-      const cityLocation = locationResults.find((loc: any) =>
-        loc.subType === 'CITY' || loc.type === 'CITY'
-      );
-
+      const cityLocation = locationResults.find((loc) => loc.subType === 'CITY' || loc.type === 'CITY');
       if (!cityLocation) {
         console.warn(`Could not find city code for ${location}, using fallback price`);
-        return {
-          price: Math.floor(Math.random() * 400) + 100, // Fallback
-          currency: "USD"
-        };
+        return { price: Math.floor(Math.random() * 400) + 100, currency: "USD" };
       }
-
       const cityCode = cityLocation.iataCode;
       console.log(`Found city code: ${cityCode} for ${location}`);
-
       // Step 2: Get hotels in this city
       const hotelsResponse = await fetch(`${API_CONFIG.BASE_URL}/hotels`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cityCode: cityCode,
           radius: 5,
@@ -291,33 +292,22 @@ const alertService = {
           hotelSource: 'ALL'
         })
       });
-
       if (!hotelsResponse.ok) {
         throw new Error(`Error fetching hotels: ${hotelsResponse.statusText}`);
       }
-
       const hotelsData = await hotelsResponse.json();
       const hotels = hotelsData.data || [];
-
-      // If no hotels found, return fallback
       if (hotels.length === 0) {
         console.warn(`No hotels found in ${location}, using fallback price`);
-        return {
-          price: Math.floor(Math.random() * 400) + 100, // Fallback
-          currency: "USD"
-        };
+        return { price: Math.floor(Math.random() * 400) + 100, currency: "USD" };
       }
-
       // Take up to 5 hotels for price check
       const hotelsToCheck = hotels.slice(0, 5);
-      const hotelIds = hotelsToCheck.map((hotel: any) => hotel.hotelId);
-
+      const hotelIds = (hotelsToCheck as Array<{ hotelId: string }>).map((hotel) => hotel.hotelId);
       // Step 3: Get prices for these hotels
       const pricesResponse = await fetch(`${API_CONFIG.BASE_URL}/hotel-prices`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           hotelIds: hotelIds,
           adults: 1,
@@ -328,72 +318,43 @@ const alertService = {
           priceRange: '0-2000'
         })
       });
-
       if (!pricesResponse.ok) {
         throw new Error(`Error fetching hotel prices: ${pricesResponse.statusText}`);
       }
-
       const pricesData = await pricesResponse.json();
       const hotelOffers = pricesData.data || [];
-
-      // If no price offers found, return fallback
       if (hotelOffers.length === 0) {
         console.warn(`No hotel prices found for ${location}, using fallback price`);
-        return {
-          price: Math.floor(Math.random() * 400) + 100, // Fallback
-          currency: "USD"
-        };
+        return { price: Math.floor(Math.random() * 400) + 100, currency: "USD" };
       }
-
       // Step 4: Calculate average price from all offers
       let totalPrice = 0;
       let validPricesCount = 0;
       let currency = "USD";
-
-      hotelOffers.forEach((hotel: any) => {
+      (hotelOffers as Array<{ offers: Array<{ price: { total: string; currency: string } }> }>).forEach((hotel) => {
         if (hotel.offers && hotel.offers.length > 0) {
-          // Find the cheapest offer for each hotel
           let cheapestOffer = hotel.offers[0];
           for (const offer of hotel.offers) {
             if (parseFloat(offer.price.total) < parseFloat(cheapestOffer.price.total)) {
               cheapestOffer = offer;
             }
           }
-
           totalPrice += parseFloat(cheapestOffer.price.total);
           validPricesCount++;
-          currency = cheapestOffer.price.currency; // Typically USD as requested
+          currency = cheapestOffer.price.currency;
         }
       });
-
-      // If no valid prices found, return fallback
       if (validPricesCount === 0) {
         console.warn(`No valid prices found for hotels in ${location}, using fallback price`);
-        return {
-          price: Math.floor(Math.random() * 400) + 100, // Fallback
-          currency: "USD"
-        };
+        return { price: Math.floor(Math.random() * 400) + 100, currency: "USD" };
       }
-
-      // Calculate average price
       const averagePrice = totalPrice / validPricesCount;
-
-      // Round to 2 decimal places
       const roundedPrice = Math.round(averagePrice * 100) / 100;
-
       console.log(`Average hotel price in ${location}: ${roundedPrice} ${currency} (based on ${validPricesCount} hotels)`);
-
-      return {
-        price: roundedPrice,
-        currency: currency
-      };
+      return { price: roundedPrice, currency: currency };
     } catch (error) {
       console.error("Error fetching hotel prices:", error);
-      // Fallback price if API call fails
-      return {
-        price: Math.floor(Math.random() * 400) + 100,
-        currency: "USD"
-      };
+      return { price: Math.floor(Math.random() * 400) + 100, currency: "USD" };
     }
   }
 };
