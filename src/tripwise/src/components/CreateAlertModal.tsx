@@ -7,7 +7,7 @@ import { Alert } from "../services/models/Alert"
 
 interface CreateAlertModalProps {
   onClose: () => void
-  onCreateAlert: (alert: any) => void
+  onCreateAlert: (alert: Alert) => void
   existingAlert?: Alert | null
 }
 
@@ -163,7 +163,8 @@ const checkCurrentPrice = async () => {
     
     try {
       // Create alert data based on form inputs
-      const newAlert: any = {
+      const newAlert: Alert  = {
+        id: existingAlert ? existingAlert.id : Date.now(),
         type: alertType,
         startDate: new Date(departureDate),
         endDate: returnDate ? new Date(returnDate) : new Date(departureDate),
