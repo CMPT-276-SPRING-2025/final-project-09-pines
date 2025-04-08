@@ -7,7 +7,6 @@ const OnTheGoPrompt =require('./prompts/OnTheGoPrompt');
 const RecommendPrompt = require('./prompts/RecommendPrompt');
 const TravelPrompt = require('./prompts/TravelPrompt');
 const ReviewPrompt = require('./prompts/ReviewPrompt');
-const AlertPrompt = require('./prompts/AlertPrompt');
 const { functionDefinitions } = require('./functionDefinitions');
 
 // Mapping between features and function definitions

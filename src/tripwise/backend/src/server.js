@@ -33,7 +33,7 @@ cron.schedule('0 * * * *', async () => {
   console.log('Running scheduled alert check');
   try {
     // Make a request to the alert check endpoint
-    const response = await fetch(`http://localhost:${process.env.PORT || 10000}/api/alerts/check`, {
+    const response = await fetch(`http://localhost:${process.env.PORT || 5001}/api/alerts/check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server - Using port 5001 consistently
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

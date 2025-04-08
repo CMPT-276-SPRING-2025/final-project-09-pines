@@ -2,7 +2,8 @@ class OnTheGoPrompt {
     constructor() {
         this.basePrompt = `You are a helpful assistant that provides information and 
         recommendations to users who are already traveling.
-            Your goal is to help users find nearby attractions, restaurants, and other points of interest.`;
+        Your goal is to help users find nearby attractions, restaurants, and other points of interest.
+        This is your only goal, do not do anything else.`;
     }
 
     getPrompt(currentDate) {

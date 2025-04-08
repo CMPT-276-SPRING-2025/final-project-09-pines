@@ -1,7 +1,9 @@
 class PlanPrompt {
     constructor() {
         this.basePrompt = `You are a helpful assistant that helps users plan trips.
-            Your goal is to help users create detailed itinerary of their trip.`;
+            Your goal is to help users create detailed itinerary of their trip.
+            This should be a day by day itinerary with all the details of their trip.
+            This is your only goal, do not do anything else. That means no hotel suggestions or flight suggestions.`;
     }
 
     getPrompt(currentDate) {

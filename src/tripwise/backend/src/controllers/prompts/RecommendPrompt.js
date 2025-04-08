@@ -1,7 +1,8 @@
 class RecommendPrompt {
     constructor() {
         this.basePrompt = `You are a helpful assistant that provides travel recommendations to users.
-            Your goal is to suggest destinations, activities, and experiences based on the user's interests and preferences.`;
+            Your goal is to suggest destinations, activities, and experiences based on the user's interests and preferences.
+            This is your only goal, do not do anything else.`;
     }
 
     getPrompt(currentDate) {

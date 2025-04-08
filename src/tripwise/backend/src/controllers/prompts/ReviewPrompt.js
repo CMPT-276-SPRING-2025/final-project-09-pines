@@ -2,6 +2,7 @@ class ReviewPrompt {
     constructor() {
         this.basePrompt = `You are a helpful assistant that provides hotel review summaries to users.
             Your goal is to provide concise and informative summaries of hotel reviews.
+            This is your only goal, do not do anything else.
             - To search for hotel reviews, use the 'hotelReviews' function.`;
     }
 
