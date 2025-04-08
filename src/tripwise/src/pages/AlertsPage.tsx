@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import CreateAlertModal from "../components/CreateAlertModal"
 import LoadingAnimation from "../components/LoadingAnimation"
 import alertService from "../services/alertService"
-import { Alert, FlightAlert, HotelAlert } from "../services/models/Alert"
+import { Alert } from "../services/models/Alert"
 import "./AlertsPage.css"
 
 export default function AlertsPage() {

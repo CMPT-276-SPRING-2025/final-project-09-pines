@@ -11,13 +11,11 @@ interface LoadingAnimationProps {
 }
 
 const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ message, onAnimationComplete }) => {
-  const [animationStarted, setAnimationStarted] = useState(false)
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     // Start animation after a short delay
     const startTimer = setTimeout(() => {
-      setAnimationStarted(true)
     }, 100)
 
     // Simulate progress - FASTER ANIMATION
