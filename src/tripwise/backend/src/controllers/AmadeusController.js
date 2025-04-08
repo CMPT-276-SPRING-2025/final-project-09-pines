@@ -1,6 +1,11 @@
 require('dotenv').config();
 
-async function getAccessToken() { 
+/**
+ * Retrieves an access token from the Amadeus API.
+ * @returns {Promise<object>} - The access token data.
+ * @throws {Error} - If there is an error fetching the access token.
+ */
+async function getAccessToken() {
     const url = 'https://test.api.amadeus.com/v1/security/oauth2/token';
     const params = new URLSearchParams();
     params.append('grant_type', 'client_credentials');
@@ -26,21 +31,27 @@ async function getAccessToken() {
     }
 }
 
+/**
+ * Retrieves flight offers from the Amadeus API.
+ * @param {object} queryParams - The query parameters for the flight search.
+ * @returns {Promise<object>} - The flight offers data.
+ * @throws {Error} - If there is an error fetching flight offers.
+ */
 async function getFlightOffers(queryParams) {
     try {
         const token = await getAccessToken();
         const endpoint = 'https://test.api.amadeus.com/v2/shopping/flight-offers';
         const url = new URL(endpoint);
-        
+
         // Set a default value for the max flights if not provided:
         if (!queryParams.max) {
-            queryParams.max = "5";        
+            queryParams.max = "5";
         }
 
         Object.keys(queryParams).forEach(key => {
             url.searchParams.append(key, queryParams[key]);
         });
-        
+
         console.log("Requesting flight offers from:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
@@ -63,17 +74,23 @@ async function getFlightOffers(queryParams) {
     }
 }
 
+/**
+ * Retrieves hotels by city from the Amadeus API.
+ * @param {object} queryParams - The query parameters for the hotel search.
+ * @returns {Promise<object>} - The hotels data.
+ * @throws {Error} - If there is an error fetching hotels by city.
+ */
 async function getHotelsByCity(queryParams) {
     try {
         const token = await getAccessToken();
         const endpoint = 'https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city';
         const url = new URL(endpoint);
-        
+
         // Append each query parameter to the URL.
         Object.keys(queryParams).forEach(key => {
             url.searchParams.append(key, queryParams[key]);
         });
-        
+
         console.log("Requesting hotels by city from:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
@@ -82,13 +99,13 @@ async function getHotelsByCity(queryParams) {
                 'Authorization': `Bearer ${token.access_token}`
             }
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`Error fetching hotels by city: ${response.statusText}`, errorText);
             throw new Error(`Error fetching hotels by city: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         console.log("Received hotels data:", data);
         return data;
@@ -98,57 +115,63 @@ async function getHotelsByCity(queryParams) {
     }
 }
 
+/**
+ * Retrieves hotel offers from the Amadeus API.
+ * @param {object} queryParams - The query parameters for the hotel search.
+ * @returns {Promise<object>} - The hotel offers data.
+ * @throws {Error} - If there is an error fetching hotel offers.
+ */
 async function getHotelOffers(queryParams) {
-  try {
-    const token = await getAccessToken();
-    // Use the v3 endpoint for hotel offers.
-    const endpoint = 'https://test.api.amadeus.com/v3/shopping/hotel-offers';
-    const url = new URL(endpoint);
-    
-    // Extract hotelIds from queryParams
-    if (!queryParams.hotelIds || queryParams.hotelIds.length === 0) {
-      throw new Error("No hotel IDs provided in the request parameters.");
+    try {
+        const token = await getAccessToken();
+        // Use the v3 endpoint for hotel offers.
+        const endpoint = 'https://test.api.amadeus.com/v3/shopping/hotel-offers';
+        const url = new URL(endpoint);
+
+        // Extract hotelIds from queryParams
+        if (!queryParams.hotelIds || queryParams.hotelIds.length === 0) {
+            throw new Error("No hotel IDs provided in the request parameters.");
+        }
+
+        // Append hotelIds as a comma-separated string.
+        url.searchParams.append('hotelIds', queryParams.hotelIds.join(','));
+
+        // Create a copy of queryParams without the hotelIds to avoid duplicate parameters
+        const otherParams = { ...queryParams };
+        delete otherParams.hotelIds;
+
+        // Append any additional query parameters provided.
+        Object.keys(otherParams).forEach(key => {
+            url.searchParams.append(key, otherParams[key]);
+        });
+
+        // Append currency if not already provided.
+        if (!queryParams.currency) {
+            url.searchParams.append('currency', 'USD');
+        }
+
+        console.log("Requesting hotel offers from:", url.toString());
+        const response = await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.access_token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Error fetching hotel offers: ${response.statusText}`, errorText);
+            throw new Error(`Error fetching hotel offers: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Received hotel offers data:", data);
+        return data;
+    } catch (error) {
+        console.error("Error in getHotelOffers:", error);
+        throw error;
     }
-    
-    // Append hotelIds as a comma-separated string.
-    url.searchParams.append('hotelIds', queryParams.hotelIds.join(','));
-    
-    // Create a copy of queryParams without the hotelIds to avoid duplicate parameters
-    const otherParams = { ...queryParams };
-    delete otherParams.hotelIds;
-    
-    // Append any additional query parameters provided.
-    Object.keys(otherParams).forEach(key => {
-      url.searchParams.append(key, otherParams[key]);
-    });
-    
-    // Append currency if not already provided.
-    if (!queryParams.currency) {
-      url.searchParams.append('currency', 'USD');
-    }
-    
-    console.log("Requesting hotel offers from:", url.toString());
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token.access_token}`
-      }
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error fetching hotel offers: ${response.statusText}`, errorText);
-      throw new Error(`Error fetching hotel offers: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log("Received hotel offers data:", data);
-    return data;
-  } catch (error) {
-    console.error("Error in getHotelOffers:", error);
-    throw error;
-  }
 }
 
 /**
@@ -253,30 +276,27 @@ async function getFlightPriceForAlert(origin, destination, departureDate, return
                 price: 500,
                 currency: "USD",
                 priceVerified: false
-                // Removed availability
             };
         }
 
         // Extract price from the cheapest flight offer
         const cheapestOffer = flightData.data[0];
-        
+
         return {
             price: parseFloat(cheapestOffer.price.total),
             currency: cheapestOffer.price.currency,
             priceVerified: true,
             flightNumber: cheapestOffer.itineraries[0].segments[0].number,
             airline: cheapestOffer.itineraries[0].segments[0].carrierCode
-            // Removed availability
         };
     } catch (error) {
         console.error("Error getting flight price for alert:", error);
-        
+
         // Return a fallback with placeholder data
         return {
             price: 500,
             currency: "USD",
             priceVerified: false
-            // Removed availability
         };
     }
 }
@@ -318,7 +338,7 @@ async function getHotelPriceForAlert(hotelId, checkInDate, checkOutDate) {
 
         // Extract the cheapest room offer
         const hotelOffer = hotelData.data[0];
-        
+
         if (!hotelOffer.offers || hotelOffer.offers.length === 0) {
             console.warn("No room offers found for hotel, using fallback price");
             return {
@@ -329,7 +349,7 @@ async function getHotelPriceForAlert(hotelId, checkInDate, checkOutDate) {
                 availability: 65
             };
         }
-        
+
         // Find the cheapest room
         let cheapestRoom = hotelOffer.offers[0];
         for (const offer of hotelOffer.offers) {
@@ -340,24 +360,24 @@ async function getHotelPriceForAlert(hotelId, checkInDate, checkOutDate) {
 
         // Get real availability data
         let availability = 65; // Default booking percentage
-        
+
         // Count available vs. total rooms
         const totalRooms = hotelOffer.offers.length;
-        const availableRooms = hotelOffer.offers.filter(offer => 
-            offer.available === true || 
+        const availableRooms = hotelOffer.offers.filter(offer =>
+            offer.available === true ||
             (offer.policies && offer.policies.guarantee && offer.policies.guarantee.acceptedPayments)
         ).length;
-        
+
         if (totalRooms > 0) {
             // Calculate booked percentage
             const percentAvailable = (availableRooms / totalRooms) * 100;
             availability = 100 - percentAvailable; // Convert to "booked" percentage
             availability = Math.min(Math.max(availability, 30), 95); // Keep between 30-95%
         }
-        
+
         return {
             price: parseFloat(cheapestRoom.price.total),
-            pricePerNight: cheapestRoom.price.variations?.average?.base 
+            pricePerNight: cheapestRoom.price.variations?.average?.base
                 ? parseFloat(cheapestRoom.price.variations.average.base)
                 : parseFloat(cheapestRoom.price.total) / getDateDifference(checkInDate, checkOutDate),
             currency: cheapestRoom.price.currency,
@@ -368,7 +388,7 @@ async function getHotelPriceForAlert(hotelId, checkInDate, checkOutDate) {
         };
     } catch (error) {
         console.error("Error getting hotel price for alert:", error);
-        
+
         // Return a fallback with placeholder data
         return {
             price: 200,
@@ -382,6 +402,9 @@ async function getHotelPriceForAlert(hotelId, checkInDate, checkOutDate) {
 
 /**
  * Helper function to get the difference between two dates in days
+ * @param {string} startDate - The start date in YYYY-MM-DD format.
+ * @param {string} endDate - The end date in YYYY-MM-DD format.
+ * @returns {number} - The difference between the two dates in days.
  */
 function getDateDifference(startDate, endDate) {
     const start = new Date(startDate);
@@ -401,10 +424,10 @@ async function searchLocations(keyword) {
         const token = await getAccessToken();
         const endpoint = 'https://test.api.amadeus.com/v1/reference-data/locations';
         const url = new URL(endpoint);
-        
+
         url.searchParams.append('keyword', keyword);
         url.searchParams.append('subType', 'AIRPORT,CITY');
-        
+
         console.log("Searching locations:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
@@ -413,13 +436,13 @@ async function searchLocations(keyword) {
                 'Authorization': `Bearer ${token.access_token}`
             }
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`Error searching locations: ${response.statusText}`, errorText);
             throw new Error(`Error searching locations: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         console.log("Received locations data:", data);
         return data;
@@ -443,7 +466,7 @@ async function checkFlightPriceChange(alert) {
             alert.startDate,
             alert.endDate
         );
-        
+
         // If we couldn't get real price data, keep the existing price
         if (!priceData.priceVerified) {
             console.warn(`Could not verify price for alert ${alert.id}, keeping existing price`);
@@ -452,13 +475,13 @@ async function checkFlightPriceChange(alert) {
                 lastChecked: new Date().toISOString()
             };
         }
-        
+
         // Compare with the stored price
         const previousPrice = alert.currentPrice;
         const currentPrice = priceData.price;
         const priceDifference = previousPrice - currentPrice;
         const percentChange = (priceDifference / previousPrice) * 100;
-        
+
         // Update the alert object with real data
         return {
             ...alert,
@@ -467,7 +490,6 @@ async function checkFlightPriceChange(alert) {
             priceDifference,
             percentChange,
             currency: priceData.currency || alert.currency,
-            // Removed availability and isAlmostFull fields
             lastChecked: new Date().toISOString(),
             isPriceDropped: currentPrice < previousPrice,
             isTargetReached: currentPrice <= alert.targetPrice,
@@ -486,14 +508,14 @@ async function checkFlightPriceChange(alert) {
 }
 
 module.exports = {
-  getAccessToken,
-  getFlightOffers,
-  getHotelsByCity,
-  getHotelOffers,
-  getHotelReviews,
-  // Alert-related functions
-  getFlightPriceForAlert,
-  getHotelPriceForAlert,
-  searchLocations,
-  checkFlightPriceChange
+    getAccessToken,
+    getFlightOffers,
+    getHotelsByCity,
+    getHotelOffers,
+    getHotelReviews,
+    // Alert-related functions
+    getFlightPriceForAlert,
+    getHotelPriceForAlert,
+    searchLocations,
+    checkFlightPriceChange
 };
