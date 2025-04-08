@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -11,7 +12,7 @@ html, body {
   height: 100vh;
   padding: 20px;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+  background: linear-gradient(to bottom, #2c3e50, #4ca1af);
   position: relative;
   overflow: hidden;
   font-family: Arial, sans-serif;
@@ -21,7 +22,7 @@ html, body {
 .chat-decoration {
   position: absolute;
   border-radius: 50%;
-  background: rgba(3, 169, 244, 0.05);
+  background: rgba(255, 255, 255, 0.05);
   filter: blur(60px);
   z-index: 0;
 }
@@ -71,14 +72,14 @@ html, body {
   height: 2.8rem;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 15px rgba(2, 136, 209, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   color: #0288d1;
   text-transform: capitalize;
 }
 
 .nav-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(2, 136, 209, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Position the back button to the left */
@@ -95,14 +96,14 @@ html, body {
   justify-content: center;
   cursor: pointer;
   color: #0288d1;
-  box-shadow: 0 4px 15px rgba(2, 136, 209, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 20;
 }
 
 .back-button:hover {
   transform: translateX(-3px);
-  box-shadow: 0 8px 20px rgba(2, 136, 209, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Centered container for feature buttons */
@@ -117,7 +118,7 @@ html, body {
   background: linear-gradient(135deg, #0288d1, #03a9f4);
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(2, 136, 209, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .chat-window {
@@ -129,7 +130,7 @@ html, body {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(2, 136, 209, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   z-index: 5;
   position: relative;
   scrollbar-width: thin;
@@ -162,8 +163,14 @@ html, body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chat-message:hover {
@@ -213,14 +220,14 @@ html, body {
   margin-right: 1rem;
   border-radius: 999px;
   box-sizing: border-box;
-  box-shadow: 0 8px 25px rgba(2, 136, 209, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 2px solid transparent;
 }
 
 .chat-input-box:focus-within {
-  box-shadow: 0 12px 30px rgba(2, 136, 209, 0.15);
-  border-color: rgba(2, 136, 209, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .chat-input {
@@ -247,13 +254,13 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 25px rgba(2, 136, 209, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .chat-send-button:hover {
   transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .chat-save-button {
@@ -268,14 +275,14 @@ html, body {
   justify-content: center;
   cursor: pointer;
   margin-left: 10px;
-  box-shadow: 0 8px 25px rgba(2, 136, 209, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   font-size: 24px;
 }
 
 .chat-save-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* Add typing indicator animation */
@@ -308,7 +315,8 @@ html, body {
 }
 
 @keyframes typing {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(0.6);
     opacity: 0.6;
   }
@@ -338,7 +346,9 @@ html, body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Disabled input styling */
@@ -366,13 +376,13 @@ html, body {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 15px rgba(2, 136, 209, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: inline-block;
 }
 
 .hotel-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(2, 136, 209, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Make review quotes look better */
@@ -388,9 +398,9 @@ html, body {
 }
 
 /* Style headings in review responses */
-.gemini-message h1, 
-.gemini-message h2, 
-.gemini-message h3, 
+.gemini-message h1,
+.gemini-message h2,
+.gemini-message h3,
 .gemini-message h4 {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -418,7 +428,7 @@ html, body {
 }
 
 .gemini-message code {
-  font-family: 'Consolas', 'Monaco', monospace;
+  font-family: "Consolas", "Monaco", monospace;
   font-size: 0.9em;
 }
 
@@ -435,7 +445,7 @@ html, body {
     width: 60px;
     height: 60px;
   }
-  
+
   .chat-feature-buttons {
     margin-left: 80px; /* Increased for larger screens */
   }
@@ -493,13 +503,13 @@ html, body {
     width: 800px;
     height: 800px;
   }
-  
+
   .hotel-link {
     font-size: 1.4rem;
     padding: 8px 16px;
     border-radius: 16px;
   }
-  
+
   .loading-spinner {
     width: 30px;
     height: 30px;

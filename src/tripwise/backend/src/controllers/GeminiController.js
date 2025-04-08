@@ -15,21 +15,35 @@ const featureFunctionMap = {
     review: [functionDefinitions.hotelReviews]
 };
 
-// Use your API key from environment variables
+// Initialize Gemini Pro model with API key
 const apiKey = process.env.API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-let chatSession = null;
-let conversationHistory = []; // Add this at the top with your other variables
+// Conversation history
+let conversationHistory = [];
 
+// Last hotel search results
+let lastHotelSearchResults = null;
+
+/**
+ * Converts a string to title case.
+ * @param {string} str - The string to convert.
+ * @returns {string} - The string in title case.
+ */
 const titleCase = (str) => {
     if (!str) return '';
     return str.toLowerCase().split(' ').map(function (word) {
-      return (word.charAt(0).toUpperCase() + word.slice(1));
+        return (word.charAt(0).toUpperCase() + word.slice(1));
     }).join(' ');
 };
 
+/**
+ * Searches for flights using the Amadeus API.
+ * @param {object} searchParams - The search parameters.
+ * @returns {Promise<object>} - The flight offers.
+ * @throws {Error} - If there is an error fetching flight offers.
+ */
 async function searchFlights(searchParams) {
     try {
         console.log("Detected flight search. Calling Amadeus.getFlightOffers with:", searchParams);
@@ -41,22 +55,34 @@ async function searchFlights(searchParams) {
     }
 }
 
+/**
+ * Lists hotels using the Amadeus API.
+ * @param {object} searchParams - The search parameters.
+ * @returns {Promise<object>} - The hotels list.
+ * @throws {Error} - If there is an error fetching hotels.
+ */
 async function listHotels(searchParams) {
     try {
-      const hotelsList = await Amadeus.getHotelsByCity(searchParams);
-      // Store the results for future reference
-    lastHotelSearchResults = {
-        data: hotelsList.data.map(hotel => ({
-          name: hotel.name,
-          hotelId: hotel.hotelId
-        }))
-    };
-      return hotelsList;
+        const hotelsList = await Amadeus.getHotelsByCity(searchParams);
+        // Store the results for future reference
+        lastHotelSearchResults = {
+            data: hotelsList.data.map(hotel => ({
+                name: hotel.name,
+                hotelId: hotel.hotelId
+            }))
+        };
+        return hotelsList;
     } catch (error) {
-      throw error;
+        throw error;
     }
 }
 
+/**
+ * Gets hotel prices using the Amadeus API.
+ * @param {object} searchParams - The search parameters.
+ * @returns {Promise<object>} - The hotel offers.
+ * @throws {Error} - If there is an error fetching hotel offers.
+ */
 async function hotelPrices(searchParams) {
     try {
         console.log("Detected hotel prices request. Calling Amadeus.getHotelOffers with:", searchParams);
@@ -76,9 +102,9 @@ async function hotelPrices(searchParams) {
                     return hotel.hotelId;
                 } else {
                     console.warn(`Hotel with name "${name}" not found in previous search results.`);
-                    return null; // Or handle not found hotels as needed
+                    return null;
                 }
-            }).filter(id => id !== null); // Filter out hotels not found
+            }).filter(id => id !== null);
 
             if (hotelIds.length === 0) {
                 throw new Error("No matching hotel IDs found for the provided hotel names.");
@@ -107,9 +133,8 @@ async function hotelPrices(searchParams) {
         // Fetch hotel offers for each chunk
         const hotelOffersResponses = [];
         for (const chunk of hotelIdChunks) {
-            // Ensure currency is CAD if not provided
             const chunkSearchParams = { ...searchParams, hotelIds: chunk };
-            delete chunkSearchParams.hotelNames; // Remove hotelNames, as it's not needed anymore
+            delete chunkSearchParams.hotelNames;
             if (!chunkSearchParams.currency) {
                 chunkSearchParams.currency = 'CAD';
             }
@@ -119,7 +144,6 @@ async function hotelPrices(searchParams) {
                 hotelOffersResponses.push(hotelOffers);
             } catch (error) {
                 console.error("Error fetching hotel offers for chunk:", chunk, error);
-                // Handle the error as needed, e.g., skip this chunk or throw an error
             }
         }
 
@@ -147,9 +171,15 @@ async function hotelPrices(searchParams) {
     }
 }
 
+/**
+ * Clears the conversation history.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {object} - The response object with a message.
+ */
 exports.clearChat = (req, res) => {
     try {
-        conversationHistory = []; // Clear the history
+        conversationHistory = [];
         res.json({ message: "Chat history cleared" });
     } catch (error) {
         console.error("Error clearing chat history:", error);
@@ -157,6 +187,12 @@ exports.clearChat = (req, res) => {
     }
 };
 
+/**
+ * Handles chat requests.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {Promise<object>} - The response object with a message.
+ */
 exports.handleChat = async (req, res) => {
     const { feature, query, currentDate } = req.body;
     let prompt = "";
@@ -227,7 +263,6 @@ exports.handleChat = async (req, res) => {
 
                 console.log("Function response:", functionResponse);
 
-                // Create function response prompt
                 let functionDataPrompt;
                 if (functionName === "searchFlights") {
                     functionDataPrompt = "Please convert the following flight offer data into a friendly, human-readable summary:\n" + JSON.stringify(functionResponse);
@@ -253,7 +288,6 @@ exports.handleChat = async (req, res) => {
                 });
 
                 const summaryContent = summaryResponse.response.candidates[0].content;
-                // Add summary to history
                 conversationHistory.push({ role: "model", parts: summaryContent.parts });
 
                 const friendlyText = summaryContent.parts[0].text;
@@ -263,7 +297,6 @@ exports.handleChat = async (req, res) => {
                 return res.status(500).json({ message: `Error calling function: ${functionName}` });
             }
         } else {
-            // If Gemini doesn't want to call a function, return the text response
             const text = geminiContent.parts[0].text;
             console.log("Gemini returned text:", text);
             return res.json({ message: text });
@@ -274,7 +307,12 @@ exports.handleChat = async (req, res) => {
     }
 };
 
-// Helper function to get the appropriate prompt class
+/**
+ * Gets the appropriate prompt class for a given feature.
+ * @param {string} feature - The feature to get the prompt class for.
+ * @returns {object} - The prompt class.
+ * @throws {Error} - If the feature is invalid.
+ */
 function getPromptClassForFeature(feature) {
     switch (feature) {
         case "plan": return new PlanPrompt();
