@@ -892,7 +892,7 @@ function Schedule() {
                     <select
                       id="activity-category"
                       value={editingActivity.category}
-                      onChange={(e) => setEditingActivity({ ...editingActivity, category: e.target.value as any })}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, category: e.target.value as "food" | "attraction" | "transport" | "accommodation" | "other" })}
                       required
                     >
                       <option value="food">Food</option>
