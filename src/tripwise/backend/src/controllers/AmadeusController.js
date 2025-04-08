@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 /**
  * Retrieves an access token from the Amadeus API.
  * @returns {Promise<object>} - The access token data.
