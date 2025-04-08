@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware - CORRECT CORS CONFIGURATION
 app.use(cors({
-  origin: ['https://final-project-09-pines-eoxv.vercel.app', 'http://localhost:5173'],
+  origin: ['https://final-project-09-pines-eoxv.vercel.app', 'https://final-project-09-pines-mktkemsk2-muneebs-projects-4f85e1c8.vercel.app/'],
   credentials: true
 }));
 app.use(express.json());
