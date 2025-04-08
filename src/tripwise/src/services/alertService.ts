@@ -199,12 +199,20 @@ const alertService = {
       }
 
       const data = await response.json();
-      return data.data.map((location: any) => ({
+      return (data.data as {
+        iataCode: string;
+        name: string;
+        address?: {
+          cityName: string;
+          countryName: string;
+        };
+        subType: string;
+      }[]).map((location) => ({
         id: location.iataCode,
         name: `${location.name} (${location.iataCode})`,
         code: location.iataCode,
-        city: location.address?.cityName,
-        country: location.address?.countryName,
+        city: location.address?.cityName || '',
+        country: location.address?.countryName || '',
         type: location.subType
       }));
     } catch (error) {
@@ -267,10 +275,19 @@ const alertService = {
       }
 
       const data = await locationResponse.json();
-      const locationResults = data.data || [];
+      const locationResults: {
+        subType: string;
+        type: string;
+        iataCode: string;
+        name: string;
+        address?: {
+          cityName: string;
+          countryName: string;
+        };
+      }[] = data.data || [];
 
       // Find the first city in results
-      const cityLocation = locationResults.find((loc: any) =>
+      const cityLocation = locationResults.find((loc) =>
         loc.subType === 'CITY' || loc.type === 'CITY'
       );
 
@@ -319,7 +336,7 @@ const alertService = {
 
       // Take up to 5 hotels for price check
       const hotelsToCheck = hotels.slice(0, 5);
-      const hotelIds = hotelsToCheck.map((hotel: any) => hotel.hotelId);
+      const hotelIds = hotelsToCheck.map((hotel: { hotelId: string }) => hotel.hotelId);
 
       // Step 3: Get prices for these hotels
       const pricesResponse = await fetch(`${API_CONFIG.BASE_URL}/hotel-prices`, {
@@ -359,7 +376,7 @@ const alertService = {
       let validPricesCount = 0;
       let currency = "USD";
 
-      hotelOffers.forEach((hotel: any) => {
+      hotelOffers.forEach((hotel: { offers: { price: { total: string; }; }[]; }) => {
         if (hotel.offers && hotel.offers.length > 0) {
           // Find the cheapest offer for each hotel
           let cheapestOffer = hotel.offers[0];
