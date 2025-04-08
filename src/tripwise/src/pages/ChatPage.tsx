@@ -214,8 +214,11 @@ function ChatPage() {
 
     // Create properly typed markdown components
     const markdownComponents: Components = {
-        a: ({ children, href, ...props }: any) => {
-            return <a href={href} {...props}>{children}</a>;
+        a: ({ children, href, ...props }: {
+            children?: React.ReactNode;
+            href?: string | null;
+        }) => {
+            return <a href={href || undefined} {...props}>{children}</a>;
         }
     };
 
