@@ -14,7 +14,6 @@ function ChatPage() {
     const [messages, setMessages] = useState<{ type: string, text: string }[]>([]);
     const [location, setLocation] = useState<string>("");
     const [isProcessing, setIsProcessing] = useState(false);
-    const [processingHotel, setProcessingHotel] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const features: string[] = ["plan", "on-the-go", "recommend", "travel", "review",];
     const hasFetchedInitialRequest = useRef(false);
@@ -152,13 +151,11 @@ function ChatPage() {
                     .then(response => {
                         setMessages(prev => [...prev, { type: "gemini", text: response }]);
                         setIsProcessing(false);
-                        setProcessingHotel(null);
                     })
                     .catch(error => {
                         console.error("Error fetching chat response:", error);
                         setMessages(prev => [...prev, { type: "gemini", text: "Error fetching response" }]);
                         setIsProcessing(false);
-                        setProcessingHotel(null);
                     });
             }, 100);
         }
