@@ -1,3 +1,4 @@
+require('dotenv').config();
 console.log("API_KEY from process.env:", process.env.API_KEY); // Add this line
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Amadeus = require('./AmadeusController');
