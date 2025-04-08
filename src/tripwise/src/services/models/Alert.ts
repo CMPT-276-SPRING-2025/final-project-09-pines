@@ -47,7 +47,11 @@ export interface HotelAlert extends Alert {
   boardType?: string;
 }
 
-// Helper function to convert from/to your existing Alert format
+/**
+ * Converts a date string or Date object to a string in YYYY-MM-DD format.
+ * @param {string | Date} dateString - The date to convert.
+ * @returns {string} - The date in YYYY-MM-DD format.
+ */
 export const convertDateFormat = (dateString: string | Date): string => {
   if (typeof dateString === 'string') {
     return dateString;
@@ -55,17 +59,21 @@ export const convertDateFormat = (dateString: string | Date): string => {
   return dateString.toISOString().split('T')[0];
 };
 
-// Helper to convert from API to your UI format
+/**
+ * Converts an alert object from API format to UI format.
+ * @param {Alert} alert - The alert object to convert.
+ * @returns {Alert} - The converted alert object.
+ */
 export const convertToUIFormat = (alert: Alert): Alert => {
   // Convert dates from ISO strings to Date objects if needed
-  const startDate = typeof alert.startDate === 'string' 
-    ? new Date(alert.startDate) 
+  const startDate = typeof alert.startDate === 'string'
+    ? new Date(alert.startDate)
     : alert.startDate;
-  
-  const endDate = typeof alert.endDate === 'string' 
-    ? new Date(alert.endDate) 
+
+  const endDate = typeof alert.endDate === 'string'
+    ? new Date(alert.endDate)
     : alert.endDate;
-  
+
   return {
     ...alert,
     startDate,
@@ -73,17 +81,21 @@ export const convertToUIFormat = (alert: Alert): Alert => {
   };
 };
 
-// Helper to convert from your UI format to API format
+/**
+ * Converts an alert object from UI format to API format.
+ * @param {Alert} alert - The alert object to convert.
+ * @returns {Alert} - The converted alert object.
+ */
 export const convertToAPIFormat = (alert: Alert): Alert => {
   // Convert Date objects to ISO date strings
-  const startDate = typeof alert.startDate === 'object' 
-    ? (alert.startDate as Date).toISOString().split('T')[0] 
+  const startDate = typeof alert.startDate === 'object'
+    ? (alert.startDate as Date).toISOString().split('T')[0]
     : alert.startDate;
-  
-  const endDate = typeof alert.endDate === 'object' 
-    ? (alert.endDate as Date).toISOString().split('T')[0] 
+
+  const endDate = typeof alert.endDate === 'object'
+    ? (alert.endDate as Date).toISOString().split('T')[0]
     : alert.endDate;
-  
+
   return {
     ...alert,
     startDate,
