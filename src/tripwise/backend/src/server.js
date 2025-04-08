@@ -27,7 +27,7 @@ app.use('/api/alerts', alertRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api', geminiRoutes);
-
+/*
 // Schedule alert checking job (runs every hour)
 cron.schedule('0 * * * *', async () => {
   console.log('Running scheduled alert check');
@@ -46,12 +46,19 @@ cron.schedule('0 * * * *', async () => {
     console.error('Failed to run scheduled alert check:', error);
   }
 });
+*/
+
+// Add a simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ message: 'Backend is running!' });
+});
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send({ message: 'Something went wrong!', error: err.message });
-});
+// Update CORS configuration to allow your frontend domain
+app.use(cors({
+  origin: ['https://final-project-09-pines-eoxv.vercel.app', 'http://localhost:5173'],
+  credentials: true
+}));
 
 // Start the server - Using port 5001 consistently
 const PORT = process.env.PORT || 5001;
