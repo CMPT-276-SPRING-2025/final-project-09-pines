@@ -177,7 +177,16 @@ const alertService = {
    * @param {string} keyword - The search keyword.
    * @returns {Promise<any[]>} - A promise that resolves with an array of location suggestions.
    */
-  searchLocations: async (keyword: string): Promise<any[]> => {
+  searchLocations: async (keyword: string): Promise<
+    {
+      id: string;
+      name: string;
+      code: string;
+      city: string;
+      country: string;
+      type: string;
+    }[]
+  > => {
     try {
       if (!keyword || keyword.length < 2) {
         return [];
@@ -257,8 +266,8 @@ const alertService = {
         throw new Error(`Error searching location: ${locationResponse.statusText}`);
       }
 
-      const locationData = await locationResponse.json();
-      const locationResults = locationData.data || [];
+      const data = await locationResponse.json();
+      const locationResults = data.data || [];
 
       // Find the first city in results
       const cityLocation = locationResults.find((loc: any) =>
