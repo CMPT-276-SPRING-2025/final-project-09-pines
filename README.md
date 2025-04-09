@@ -5,7 +5,7 @@ TripWise is a comprehensive travel planning application that integrates AI-power
 ## Links
 
 - **Deployed Application:** [TripWise Live App](https://final-project-09-pines-eoxv.vercel.app)
-- **Project Report:** [Final Project Documentation](https://drive.google.com/file/d/1Q-UR3NwNcTSP6leLiAe2QVbQEQrsagXm/view?usp=share_link)
+- **Project Report:** [Final Project Documentation](https://drive.google.com/file/d/1DMbRZ3d0VXuFdOCc_4UuBbyavgxVqg-E/view?usp=share_link)
 - **Demo Video:** [TripWise Demonstration](https://drive.google.com/file/d/1qU5IFAcN_1T8ti7Mi_DU4-sNDXgxsS4p/view?usp=sharing)
 
 ## Local Deployment Instructions
