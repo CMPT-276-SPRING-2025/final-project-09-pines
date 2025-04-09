@@ -119,11 +119,13 @@ export default function AlertsPage() {
 
   const handleToggleNotification = (id: string | number) => {
     // In a real app, this would toggle notifications for the alert
+    id = id;
   }
 
   const handleAddToCalendar = (alert: Alert) => {
     // In a real app, this would add the alert to the calendar
     navigate("/schedule")
+    alert = alert;
   }
 
   const goHome = () => {
