@@ -130,13 +130,11 @@ exports.updateAlert = async (req, res) => {
         const startDate = updates.startDate || alert.startDate;
         const endDate = updates.endDate || alert.endDate;
 
-        console.log(`Fetching updated flight price for ${origin} to ${destination}`);
         const priceData = await amadeus.getFlightPriceForAlert(
           origin, destination, startDate, endDate
         );
 
         if (priceData.priceVerified) {
-          console.log(`Using verified updated price: ${priceData.price} ${priceData.currency}`);
           updates.currentPrice = priceData.price;
           updates.currency = priceData.currency;
           updates.priceVerified = true;
@@ -200,12 +198,10 @@ exports.checkAlerts = async (req, res) => {
       return res.status(200).json({ message: 'No alerts to check' });
     }
 
-    console.log(`Checking prices for ${alertsToCheck.length} alerts`);
 
     const updatedAlerts = await Promise.all(
       alertsToCheck.map(async (alert) => {
         try {
-          console.log(`Checking price for alert ${alert.id}: ${alert.origin} to ${alert.destination}`);
           const updatedAlert = await amadeus.checkFlightPriceChange(alert);
 
           const index = alerts.findIndex(a => a.id === alert.id);
@@ -299,8 +295,6 @@ exports.checkHotelAlerts = async (req, res) => {
     if (hotelAlerts.length === 0) {
       return res.status(200).json({ message: 'No hotel alerts to check' });
     }
-
-    console.log(`Checking prices for ${hotelAlerts.length} hotel alerts`);
 
     const updatedAlerts = hotelAlerts.map(alert => {
       // For demo purposes, randomly decrease or increase price

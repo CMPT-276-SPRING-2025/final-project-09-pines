@@ -61,7 +61,6 @@ function Home() {
     
     // Clear the backend chat history
     clearChat()
-      .then(() => console.log("Backend chat history cleared on Home page load"))
       .catch(error => console.error("Error clearing backend chat history:", error));
   }, []);
 

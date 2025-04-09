@@ -50,7 +50,6 @@ async function getFlightOffers(queryParams) {
             url.searchParams.append(key, queryParams[key]);
         });
 
-        console.log("Requesting flight offers from:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: {
@@ -64,7 +63,6 @@ async function getFlightOffers(queryParams) {
             throw new Error(`Error fetching flight offers: ${response.statusText}`);
         }
         const data = await response.json();
-        console.log("Received flight offers data:", data);
         return data;
     } catch (error) {
         console.error("Error in getFlightOffers:", error);
@@ -89,7 +87,6 @@ async function getHotelsByCity(queryParams) {
             url.searchParams.append(key, queryParams[key]);
         });
 
-        console.log("Requesting hotels by city from:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: {
@@ -105,7 +102,6 @@ async function getHotelsByCity(queryParams) {
         }
 
         const data = await response.json();
-        console.log("Received hotels data:", data);
         return data;
     } catch (error) {
         console.error("Error in getHotelsByCity:", error);
@@ -148,7 +144,6 @@ async function getHotelOffers(queryParams) {
             url.searchParams.append('currency', 'USD');
         }
 
-        console.log("Requesting hotel offers from:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: {
@@ -164,7 +159,6 @@ async function getHotelOffers(queryParams) {
         }
 
         const data = await response.json();
-        console.log("Received hotel offers data:", data);
         return data;
     } catch (error) {
         console.error("Error in getHotelOffers:", error);
@@ -204,7 +198,6 @@ async function getHotelReviews(hotelIds) {
             // Add the hotel IDs to the URL params
             url.searchParams.append('hotelIds', chunk.join(','));
 
-            console.log(`Fetching hotel reviews for ${chunk.join(',')} from: ${url.toString()}`);
             const response = await fetch(url.toString(), {
                 method: 'GET',
                 headers: {
@@ -220,7 +213,6 @@ async function getHotelReviews(hotelIds) {
             }
 
             const data = await response.json();
-            console.log(`Received review data for ${chunk.join(',')}:`, data);
 
             if (data && data.data) {
                 allReviews = allReviews.concat(data.data);
@@ -426,7 +418,6 @@ async function searchLocations(keyword) {
         url.searchParams.append('keyword', keyword);
         url.searchParams.append('subType', 'AIRPORT,CITY');
 
-        console.log("Searching locations:", url.toString());
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: {
@@ -442,7 +433,6 @@ async function searchLocations(keyword) {
         }
 
         const data = await response.json();
-        console.log("Received locations data:", data);
         return data;
     } catch (error) {
         console.error("Error in searchLocations:", error);

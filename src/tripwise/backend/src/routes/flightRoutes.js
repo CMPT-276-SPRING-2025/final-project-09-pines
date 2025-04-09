@@ -25,9 +25,7 @@ router.post('/price', async (req, res) => {
         examples: { origin: 'YVR', destination: 'YUL' }
       });
     }
-    
-    console.log(`Flight price request for alerts: ${originCode} to ${destinationCode}, ${departureDate} - ${returnDate}`);
-    
+        
     // For alert price check, get multiple offers and calculate average price
     const queryParams = {
       originLocationCode: originCode,
@@ -63,9 +61,7 @@ router.post('/price', async (req, res) => {
       });
       
       const averagePrice = totalPrice / flightData.data.length;
-      
-      console.log(`Calculated average price for ${originCode} to ${destinationCode}: ${averagePrice} ${currency}`);
-      
+            
       // Return the average price
       res.status(200).json({
         price: Math.round(averagePrice * 100) / 100, // Round to 2 decimals

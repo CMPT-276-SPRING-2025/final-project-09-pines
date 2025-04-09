@@ -31,7 +31,6 @@ function ChatPage() {
                 (position) => {
                     const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
                     setLocation(coords);
-                    console.log("User location:", coords);
                 },
                 (error) => {
                     console.error("Error getting location:", error);
@@ -199,7 +198,6 @@ function ChatPage() {
 
             // Clear the backend chat history
             clearChat()
-                .then(() => console.log("Backend chat history cleared"))
                 .catch(error => console.error("Error clearing backend chat history:", error));
 
             // Navigate to home page

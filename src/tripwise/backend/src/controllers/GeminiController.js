@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log("API_KEY from process.env:", process.env.API_KEY); // Add this line
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Amadeus = require('./AmadeusController');
 const PlanPrompt = require('./prompts/PlanPrompt');
@@ -46,7 +45,6 @@ const titleCase = (str) => {
  */
 async function searchFlights(searchParams) {
     try {
-        console.log("Detected flight search. Calling Amadeus.getFlightOffers with:", searchParams);
         const flightOffers = await Amadeus.getFlightOffers(searchParams);
         return flightOffers;
     } catch (error) {
@@ -85,7 +83,6 @@ async function listHotels(searchParams) {
  */
 async function hotelPrices(searchParams) {
     try {
-        console.log("Detected hotel prices request. Calling Amadeus.getHotelOffers with:", searchParams);
 
         let hotelIds = [];
 
@@ -113,7 +110,6 @@ async function hotelPrices(searchParams) {
             // If no hotelNames are provided, use the previous hotel IDs
             if (lastHotelSearchResults && lastHotelSearchResults.data) {
                 hotelIds = lastHotelSearchResults.data.map(hotel => hotel.hotelId);
-                console.log("Using hotel IDs from previous search:", hotelIds);
             } else {
                 throw new Error("No hotel IDs provided and no previous hotel search results available. Please search for hotels first.");
             }
@@ -138,7 +134,6 @@ async function hotelPrices(searchParams) {
             if (!chunkSearchParams.currency) {
                 chunkSearchParams.currency = 'CAD';
             }
-            console.log("Requesting hotel offers for chunk:", chunk);
             try {
                 const hotelOffers = await Amadeus.getHotelOffers(chunkSearchParams);
                 hotelOffersResponses.push(hotelOffers);
@@ -230,7 +225,6 @@ exports.handleChat = async (req, res) => {
         });
 
         const response = geminiResponse.response;
-        console.log("Gemini response:", response);
 
         if (!response || !response.candidates || response.candidates.length === 0) {
             return res.status(500).json({ message: "No content in Gemini response" });
@@ -245,7 +239,6 @@ exports.handleChat = async (req, res) => {
             const functionName = geminiContent.parts[0].functionCall.name;
             const functionArgs = geminiContent.parts[0].functionCall.args;
 
-            console.log(`Gemini wants to call function: ${functionName} with args:`, functionArgs);
 
             let functionResponse;
             try {
@@ -261,7 +254,6 @@ exports.handleChat = async (req, res) => {
                     return res.status(400).json({ message: `Unknown function: ${functionName}` });
                 }
 
-                console.log("Function response:", functionResponse);
 
                 let functionDataPrompt;
                 if (functionName === "searchFlights") {
@@ -298,7 +290,6 @@ exports.handleChat = async (req, res) => {
             }
         } else {
             const text = geminiContent.parts[0].text;
-            console.log("Gemini returned text:", text);
             return res.json({ message: text });
         }
     } catch (error) {
